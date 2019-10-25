@@ -25,11 +25,6 @@
     }
 </style>
 
-<!--
-    Image tags like:
-    <img src="./img/.jpg" alt="" style="max-width:100%; height:auto;">
--->
-
 <body>
     <p>
         <i>
@@ -42,22 +37,18 @@
         alt="The opening title slide reads 'Sufficiently Advanced Testing' by Zac Hatfield-Dodds, with the 3 A Institue and ANU logos."
         style="max-width:100%; height:auto;">
     <p>
-
         Let's get into the deep dive talk that I proposed on sufficiently advanced testing.
-        I'm going to be talking through four parts here which is based from how I actually started to think
-        about what would make a deep dive talk.
-    </p>
-    <p>
-        This came out of the feedback from last year's PyCon Australia where people said that they would
-        really appreciate more expert level or deep dive content but of course because they haven't
-        happened before I had no examples to base my own talk on so what am I going to try to do today.
+        After PyCon Australia 2018, people <a href="https://2019.pycon-au.org/news/deep-dive-talks/">
+            wanted more "expert" level content</a>, so the deep-dive talks were created. That means
+        I had no examples to base my own talk on, but also get to invent what I think a deep-dive
+        talked <i>should</i> be. So what am I trying to do today?
     </p>
     <p>
         I decided that I would pitch this for an audience which was comfortable coming to a talk advertised
-        as expert level so there will be some terms that I'm not going to explain from first principles but I'm
-        not aiming to require any specific expertise or experience with advanced frameworks the whole idea
-        is that this is the introduction for experts in other things who haven't learned as much about testing
-        as they would like to.
+        as expert level - so there will be some terms that I'm not going to explain from first principles.
+        On the other hand, I'm not aiming to require any specific expertise or experience with advanced
+        frameworks: because advanced testing is a niche area, the whole idea is that this is the introduction
+        for experts in <i>other</i> things who haven't learned as much about testing as they would like to.
     </p>
     <p>
         My goal is to focus more on ideas than specific tools, especially because many of the ideas do not
@@ -68,34 +59,46 @@
         alt="An outline showing 'State of the Art' (books icon), 'Inside Hypothesis' (our dragonfly logo), 'Sufficiently Advanced' (crossed wand-and-rocket), and 'call to action' (Rosie Riveter)"
         style="max-width:100%; height:auto;">
     <p>
-        The talk is organised into four parts. First I'm going to talk about the state of the art of testing how
-        we come up with test cases and how we can make computers do it for us. I'm then going to give a
-        bit of an overview of how a project called Hypothesis that I work on is implemented - what it actually
-        takes to put these techniques into practice with reasonable efficiency. My favourite section perhaps
-        is the third where I talk about techniques I think of as indistinguishable from magic; things which are
-        just super cool, so cool that it seems they can't possibly work and yet... I won't say they do, but they
-        might if we implemented them. Last of all, I promised a concrete takeaway so there will be that call
-        to action with a specific thing that you can do on Monday.
+        The talk is organised into four parts.
+    </p>
+    <p>
+        First I'm going to talk about the state of the art of testing - how
+        we come up with test cases and how we can make computers do it for us.
+    </p>
+    <p>
+        I'm then going to give an overview of how <a href="https://github.com/HypothesisWorks/hypothesis">Hypothesis</a>
+        is implemented - what it actually takes us to put these techniques into practice with reasonable efficiency.
+    </p>
+    <p>
+        In the third section, which might be my favorite, I'll talk about techniques I think of as
+        indistinguishable from magic. These tricks are just super cool, so cool that it seems they
+        can't possibly work and yet... I won't say they do, but they might if we implemented them.
+    </p>
+    <p>
+        Last of all, I promised a concrete takeaway and so we'll finish with a call
+        to action for something specific that you can do on Monday.
     </p>
     <img src="./img/outline-1.jpg" alt="Outline showing only 'State of the Art', section one"
         style="max-width:100%; height:auto;">
     <p>
         For this talk I'm going to define testing as "any technique where you assess whether or not your
-        code is correct, whether it's doing the right thing, by actually executing the code". This is quite
-        restrictive among the range of all techniques that we could use to assess whether our code is doing
-        the right thing!
+        code is correct, whether it's doing the right thing, by actually executing the code".
+        There are <a href="https://www.hillelwayne.com/post/a-bunch-of-tests/">many kinds of tests</a>,
+        but <a href="https://www.drmaciver.com/2016/10/some-things-that-might-help-you-write-better-software/">
+            even more ways</a> to write better software.
     </p>
     <p>
-        We could for example use a tool like mypy for type checking so we annotate our code for each
-        function. We declare what type of we expect that argument to be, and a type-checker can read our
+        We could for example use a tool like <a href="https://mypy.readthedocs.io/en/latest/introduction.html">
+            <code>mypy</code></a> for type checking so we annotate our code for each
+        function. We declare what type we expect that argument to be, and a type-checker can read our
         source code and determine if there are any places where we're calling that function with a type that
-        we didn't expect. This is actually really useful, especially on large teams and codebases, but it's not
-        testing.
+        we didn't expect. This is actually really useful, especially on large teams and codebases, but
+        I'm not going to call that testing.
     </p>
     <p>
-        One of my favourite techniques is getting enough sleep the night before. I find I write much better
-        code and many fewer bugs if I'm not sleep deprived... I also get twitchy if I have too much caffeine
-        and if I hit the wrong keys that doesn't help either.
+        One of my favourite techniques is getting enough sleep the night before. I find I write much
+        better code... then I get twitchy if I have too much caffeine and if I hit the wrong keys that
+        doesn't help. So sleep also prevents bugs, but it's not testing.
     </p>
     <p>
         Code review is another great one. There can be human code review; for example a workflow that's
@@ -113,7 +116,7 @@
     <p>
         The traditional way of doing it, which most of us will be familiar with as unit tests, is to think of some
         input for a function. For addition we might try to add one and two, and then we call our function
-        your add one two and then we assert that we got the expected result that is three - at least if I'm
+        <code>your_add(1, 2)</code> and then we assert that we got the expected result - three, if I'm
         implementing addition - but this has a couple of challenges.
     </p>
     <p>
@@ -128,11 +131,11 @@
     <p>
         This fundamental challenge isn't the only problem with traditional testing though: another one is
         that humans don't scale as well as computers do. For every test case that we write, a skilled human
-        has to sit and think carefully and type it out every single input to our code. While this kind of "auto-
+        had to sit and think carefully and type out every single input to our code. While this kind of "auto-
         manual" testing - automated execution but manual creation - is really useful for regression testing
         to make sure that no bugs don't re-enter our code base, or for testing edge cases where we suspect
-        that bugs might occur in the future, I actually don't think it's suitable as the only form of testing that
-        we do.
+        that bugs might occur in the future, I actually don't think it's suitable as the only form of testing
+        that we do.
     </p>
     <p>
         Whether that's what you might call unit testing of very small functions or integration testing or even
@@ -150,69 +153,52 @@
         Of course there's two problems here. The first is that we probably don't have time to check more
         than a tiny fraction of the possibly trillions or infinite number of possible behaviours; and the second
         is that it's really hard to tell whether the behaviour is correct. If you don't compare it to an exact
-        output how do you know whether you got the right result?
+        output, how do you know whether you got the right result?
     </p>
     <p>
-        This gets even harder when your requirements are fuzzy. We might call them business logic or user
-        interviews or hallway usability testing, and if you're on extremely hard mode the requirements
+        This gets even harder when your requirements are fuzzy. We might call them "business logic" or "user
+        interviews" or "hallway usability testing", and if you're on extremely hard mode the requirements
         might even change over time. Building a system where running the test takes longer, enormously
         longer, than you expect to have before the requirements change does not sound like much fun to
         me.
     </p>
     <p>
-        but there is hope and that hope is that there are actually ways that we can work out what all
-        possible behaviours of our code would be so mathematically we could think of code as being a kind
-        of finite state machine so it gets some sequence of inputs and it has some state in its variables or its
-        memory depending on how you represent it and we can mathematically reason about equivalent
-        sets of inputs.
-    </p>
-    <p>
-        So in principle at least it's possible to get complete test coverage to try everything or at least
-        something which is equivalent to anything else we could have tried without actually having to test
-        every possible logical input... and the oldest trick for this is simply to put complete garbage into the
-        program and see what happens.
+        There is some hope though, because computers are really fast - we can't test <i>everything</i>,
+        but we might well be able to test <i>enough</i>... and the oldest trick for this is simply to
+        put complete garbage into the program and see what happens.
     </p>
     <img src="./img/cards.jpg" alt="A pile of punched cards for a Jacquard loom, with words 'Garbage in, crashes out'"
         style="max-width:100%; height:auto;">
     <p>
-        For any image parser, for any network library, for most command line tools putting in random input
-        should not cause it to crash. The program should either do something - hopefully something useful
-        - or emit a specific kind of error code or exception.
+        For any image parser, for any network library, and for most command line tools putting in random input
+        should never cause it to crash. The program should either do something - hopefully something useful
+        - or emit a specific error code or exception.
     </p>
     <p>
-        Let's consider how this might work. If we think of a very simple kind of program right this program
-        only does one thing it's a single function and you call it with a string of bytes and then it returns true
-        if it worked or false if it didn't work.
+        Let's consider how this might work, for the simplest possible program. It's a single function,
+        <code>func(arg: bytes) -> bool</code>, which takes one argument (a string of bytes) and returns
+        True if it worked or False if it didn't.
     </p>
     <p>
-        Conveniently most programs are implemented on digital computers which operate on bits so the
-        idea of thinking of a function which takes bytes actually matches up surprisingly well with a lot of
-        programs that we are actually interested in. Compiled programs for example almost always operate
-        on bytes!
+        Conveniently most programs are implemented on digital computers which operate on bits so this
+        simple function which takes bytes actually matches up surprisingly well with a lot of programs
+        that we are actually interested in. Compiled programs for example almost always operate on bytes,
+        and anything else is only a parser away!
     </p>
     <p>
-        So the oldest testing technique in the book once the human testers had done their work, back in the
-        days of Fortran but before jokes about real programmers only using Fortran [*], you would take a
-        deck of punched cards, maybe from an earlier draft of the program or perhaps from today's
-        database dump for payroll. You would shuffle it up so that was nicely out of order, and you would
-        feed it into the computer. If the electromechanical computer stopped you had found a bug! [**]
+        So the oldest automated testing technique in the book, back when Fortran was new and there were
+        no jokes about real programmers only using Fortran, was based on punched cards.
+        You take a deck of punched cards, maybe from an earlier draft of the program or perhaps from today's
+        database dump for payroll. You shuffle it up so that was nicely out of order, and you
+        feed it into the computer. If the electromechanical computer stopped you had probably had a
+        logical bug in your software... or maybe a moth trapped in your hardware!
     </p>
     <p>
-        [*] because your choices for languages were Fortran, COBOL, or assembly code you had to write in
-        raw hexadecimal and perhaps enter by toggling physical switches for each bit!
-    </p>
-    <p>
-        [**] in those days a bug might even be a physical insect caught in the machinery. If there's anything
-        that we got out of Moore's Law of scaling things down the upside is that bugs are now too large to fit
-        inside our CPUs.
-    </p>
-    <p>
-        This is an old technique, but these punched cards are much older: they're a pattern or programme
-        for a thing called a Jacquard loom; a tool of the first Industrial Revolution where English textile mills
-        first learn to automate not just the weaving of cloth but the weaving of particular patterns of cloth.
+        This is an old technique, but these punched cards are much older: those pictured are the program
+        for a <a href="https://en.wikipedia.org/wiki/Jacquard_machine">Jacquard loom</a>.
         That roll of cloth was produced in a few hours and entirely by a machine, where it would have
-        previously taken much longer for skilled workers. Between the redundancies and terrible working
-        conditions, of course there was an anti-tech backlash then and the coining of the word Luddite.
+        previously taken much longer for skilled workers. The resulting anti-tech backlash of 1779-1815
+        led to the coining of the word <a href="https://en.wikipedia.org/wiki/Luddite">Luddite</a>.
     </p>
     <img src="./img/randomness.jpg" alt="" style="max-width:100%; height:auto;">
     <p>
@@ -327,6 +313,7 @@
         When you put these ideas together tracking of coverage and then random inputs you get a
         technique called fuzzing.
     </p>
+    <!-- TODO: edit from here -->
     <p>
         Fuzzing is the idea that uniformly random inputs the comb we will get from shuffled punched cards
         or from piping dev random into our binaries is unlikely to find any but the most trivial bugs almost all
@@ -373,20 +360,22 @@
     </p>
     <img src="./img/blns.jpg" alt="" style="max-width:100%; height:auto;">
     <p>
-        Property based testing is not just trying a very large number of tests - though this is a super useful
-        technique!
+        Property based testing is not just trying a very large number of tests -
+        though this is a super useful technique!
     </p>
     <p>
-        You can find the "big list of naughty strings" on GitHub, a text file thousands of lines long, where
+        You can find the <a href="https://github.com/minimaxir/big-list-of-naughty-strings">
+            big list of naughty strings on GitHub</a>, a text file thousands of lines long, where
         every line is some bit of text which has caused a bug in some other piece of software.
     </p>
     <p>
-        Some are SQL injection attacks; others are cross-site scripting problems, some are just emoji... and I
-        really wanted to put one in here which is Hebrew text which changes the direction first is left to right
-        then it's right to left then it's left to right again but when I put it into my slides PowerPoint crashed!
+        Some are SQL injection attacks; others are cross-site scripting problems, some are just emoji.
+        I really wanted to put one in here which is Hebrew text which alternates right-to-left,
+        left-to-right, and finally right-to-left again... but when I put it into my slides PowerPoint crashed!
         I don't mean to diminish the value of this kind of testing, and if you're dealing with things which
         should accept arbitrary strings as input you should definitely grab the big list of naughty strings and
-        try them all - it's really easy with something "@pytest.mark.parametrize".
+        try them all - it's really easy with something like
+        <a href="https://docs.pytest.org/en/latest/parametrize.html"><code>@pytest.mark.parametrize</code></a>.
     </p>
     <p>
         There are a couple of problems which would make us not want to do this for literally everything
@@ -396,11 +385,12 @@
         conventional test suite.
     </p>
     <p>
-        The fact that test failures based on an input corpus are reproducible and minimal, rather than flaky
-        or complex like those from a naive random generator, is better than nothing - but what if we could
-        have the discovery power of randomness as well as minimal reproducible examples?
+        The fact that test failures based on an input corpus are reproducible, rather than flaky
+        like those from a naive random generator, is better than nothing - but what if we could
+        have the discovery power of randomness as well as minimal and reproducible examples?
     </p>
     <img src="./img/pbt.jpg" alt="" style="max-width:100%; height:auto;">
+    <!-- TODO: edit from here -->
     <p>
         Property based testing is the idea that when you combine random inputs and in property based
         testing they're usually specified by the programmer in some way so instead of saying give me
@@ -429,17 +419,16 @@
         At this point I owe you a really quick overview of Hypothesis itself.
     </p>
     <p>
-        - It's a library in Python for property based testing.
-        - I'm a core developer so I might say it is the library in Python for property based testing
-        mostly because I don't know of any competition.
-        - All of the core developers are volunteers and in fact there are no non volunteer developers.
-        - We have great documentation and focus a lot in usability.
+        <li>It's the leading Python library for property based testing.</li>
+        <li>All of the core developers, including me, are volunteers.</li>
+        <li>We have <a href="https://hypothesis.readthedocs.io">great documentation</a>
+            and a strong focus on usability.</li>
     </p>
     <p>
         Whatever your concrete problem is that you need to solve with Hypothesis we have probably solved
         it and documented it... but this is not a talk about Hypothesis so much as a talk about the general
-        family of testing techniques, so if you want to learn about that I've given other talks you can find on
-        the internet.
+        family of testing techniques, so if you want to learn about that check the docs or
+        <a href="https://www.youtube.com/watch?v=KcyGUVzL7HA">my other talk about it</a>.
     </p>
     <p>
         Here I'm going to talk about the implementation: how Hypothesis minimizes examples, then how
@@ -449,11 +438,12 @@
     <img src="./img/reduction.jpg" alt="" style="max-width:100%; height:auto;">
     <p>
         Having found a bug with some random input - in the next section - our final challenge is to present
-        a minimal reproducing example. This isn't just required by Stack Overflow
-        (https://stackoverflow.com/help/minimal-reproducible-example) - understanding and debugging
-        minimal examples is far easier than large ones. Since I don't have enough time to come around to
-        your office and hand-minimize it for you, we need to automate that process!
+        a minimal reproducing example. This isn't just
+        <a href="https://stackoverflow.com/help/minimal-reproducible-example">required by Stack Overflow</a>
+        - understanding and debugging minimal examples is far easier than large ones. Since I can't come
+        around to your office and hand-minimize every example for you, we need to automate that process!
     </p>
+    <!-- TODO: edit from here -->
     <p>
         Fortunately, dealing with strings of bytes under the hood means that we have a natural way to
         decide which of two examples is simpler, and also some generic simplifying operations. This is really
