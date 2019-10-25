@@ -12,6 +12,10 @@
         font: 1em/1.6 sans-serif;
     }
 
+    code {
+        font: 1.2em/1.6 monospace;
+    }
+
     h1,
     h2,
     h3 {
@@ -200,7 +204,9 @@
         previously taken much longer for skilled workers. The resulting anti-tech backlash of 1779-1815
         led to the coining of the word <a href="https://en.wikipedia.org/wiki/Luddite">Luddite</a>.
     </p>
-    <img src="./img/randomness.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/randomness.jpg" alt="A pair of Viking-period dice, with words 'Randomness 101'"
+        style="max-width:100%; height:auto;">
+    <!-- TODO: edit from here -->
     <p>
         Time for a clarification: "randomness" can mean a couple of different things, and I realised while
         rehearsing this talk that I was using it to refer to several distinct concepts without providing a
@@ -256,7 +262,8 @@
     <p>
         With that digression about randomness let's go back to thinking about programs.
     </p>
-    <img src="./img/paths.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/paths.jpg" alt="A complicated freeway interchange, words 'coverage of paths'"
+        style="max-width:100%; height:auto;">
     <p>
         How do we work out what programs actually do? One answer in Python, and in other languages, is
         to use tools which measure code coverage.
@@ -268,97 +275,126 @@
     </p>
     <p>
         If we know what happened we can track what logic in our code was actually executed. You could
-        use this in production to work out which parts of our code are most important to optimize, or you
-        could do the converse and at testing time you can look at what parts of our code will not execute by
-        our tests if our tests. If we did execute some part of the code it's possible that it still wasn't well
-        tested, that it was executed incidentally when we were checking some other piece of functionality,
-        but if a particular function was never executed at all we can be pretty confident that it was not
-        tested either.
+        use this in production to work out which parts of your code are most important to optimize, or
+        at testing time you can see the code which is not executed by your tests. If you executed
+        some part of the code it's possible that it still wasn't well tested, that it was executed
+        incidentally when we were checking some other piece of functionality, but if a particular
+        function was never executed at all we can be pretty confident that it was not tested either.
     </p>
     <p>
-        and so there are different levels of granularity or just live different levels of detail that we can
-        measure coverage at the simplest is function level decorate every function every class every method
-        every module and just see if it gets executed this is fairly useful but in Python we can do better than
-        that.
+        There are many <a href="https://en.wikipedia.org/wiki/Code_coverage#Coverage_criteria">
+            different coverage metrics you could use</a> with varying levels of detail
+        The simplest is function level - decorate each function, class, method, and module
+        and just see if it gets executed. This is fairly useful but in Python we can do better.
     </p>
     <p>
-        coverage dot PI one of the leading Python modules can actually hook him to the interpreter and
-        report for each line of code was it executed or not these days you can even hook him to some more
-        detail and go for each test function which lines of code were executed and this lets us go through
-        and determine for example that the elf's block on some if statement was never executed because
-        the condition was always true useful to know if you're looking to delete code or work out where you
-        need additional tests or we can even go to branch coverage and branch coverage separately tracks
-        each side of an if statement so if we had a if without an else and we always have that statement as
-        true branch coverage can tell us that we don't actually need that if statement it's always been true
-        you either need another test where it's false or you can delete the conditional coverage metrics are
-        often in testing compared to a kind of maximum possible coverage which we get from analysing the
-        source code so we can go not just here is what was executed but here's what could have been
-        executed and then could I just see a show of hands who here has ever used a percentage coverage
-        metric awesome who he really loves percentage coverage few heads I'm not a huge fan it's a good
-        indicator of the rough state of your code base but if you're using a threshold for coverage something
-        where you say for example we need at least 70% coverage or at least 90% coverage for this pull
-        request to be accepted unrelated refactorings can actually make that number go down if you delete
+        <a href="https://coverage.readthedocs.io"><code>coverage</code></a>, one of the leading Python
+        modules, hooks in to the interpreter and reports whether each line of code was it executed or not.
+        It also support branch coverage, and more recently can
+        <a href="https://coverage.readthedocs.io/en/latest/contexts.html">
+            attribute coverage to individual tests</a>!
+    </p>
+    <p>
+        Line coverage lets us go through and determine for example that the <code>else</code> block on
+        some <code>if</code>-statement was never executed because the condition was always true.
+        Useful to know if you're looking to delete code or work out where you need additional tests.
+        We can go further with branch coverage, which tracks each side of an <code>if</code>-statement.
+        That lets us detect things like <code>if</code>-statements where the condition is always true,
+        meaning we either don't need that statement or we're missing a test where it's false.
+    </p>
+    <p>
+        Along with lists of uncovered lines and branches, <code>coverage</code> reports the percentage
+        of analysed code which was covered. <i>By a show of hands, most attendees use percent coverage
+            but only a few love it.</i> I'm not a huge fan of using that as a metric either.
+    </p>
+    <p>
+        It's a good indicator of the rough state of your code base, but becomes problematic if you're
+        using a threshold for something like merge approvals. When you need at least 70%, 90%, whatever
+        percent coverage, unrelated refactorings can actually make that number go down. If you delete
         trivial covered lines of code, code which is not doing anything useful but is still executed by tests
-        then you can make your coverage proportion worse and I'd know maybe this is old-fashioned but if
-        I'm tracking some number that I think represents my code quality I don't want it to go down where
-        my code quality goes up so if you can try to get coverage to spit out an exact number of uncovered
+        then you can make your coverage proportion worse. Maybe this is old-fashioned, but if I'm tracking
+        some number that I think represents my code quality I don't want it to go down where
+        my code quality goes up.
+    </p>
+    <p>
+        If you can, try to get coverage to spit out an exact number of uncovered
         lines and mandate that that never passes a particular threshold or you can simply annotate your
         code with no cover bits on the parts which you don't mind being uncovered and then require 100%
-        coverage that's actually my preferred technique because it may forces you to make an explicit
-        decision and one which you can grab for in your code base to find which parts of this code did we
-        decide we're not important enough to test.
+        coverage. That's actually my preferred technique because it forces you to make an explicit
+        decision - and one which you can <code>grep</code> for in your code base - about which parts
+        of this code we decided we're OK with not testing at all.
     </p>
     <img src="./img/fuzzing.jpg" alt="A fuzzy sheep and the word 'Fuzzing'" style="max-width:100%; height:auto;">
     <p>
         When you put these ideas together tracking of coverage and then random inputs you get a
         technique called fuzzing.
     </p>
-    <!-- TODO: edit from here -->
     <p>
-        Fuzzing is the idea that uniformly random inputs the comb we will get from shuffled punched cards
-        or from piping dev random into our binaries is unlikely to find any but the most trivial bugs almost all
-        possible inputs will simply trip across some validation logic in an image parser it might be the bit that
-        checks does this file start with "%png" if not it is not a PNG file and your chance of random bytes
-        matching that string is 1 in 256 to the power of 4 which is a fairly small number and so what we can
-        do instead of putting in uniformly random bits we can use a genetic algorithm we can actually
-        instrument our programs to watch the coverage tell what behaviour is being executed and then start
-        by putting in random things and then we find an input that does something a little different to the
-        normal we can take that input and mutate it a bit change it around put it back in see what happens
-        combine it with another one and pretty soon we're likely to find that an input which starts with
-        "%png" does something a little different it goes down a different branch and then when we add and
-        it does something different again and before you know it you've developed this testing tool which
-        will synthesize valid images for you out of thin air just by watching the behaviour of the program
-        that's meant to deal with them so based on that feedback coverage as a proxy for how much code is
-        executing and what code is this executing we can drive up the chance that we execute some part of
-        the code which- well that's the problem: the only thing we can detect with the fuzzer is a crash.
-        The second part of this trick is a collection of ways to make bugs in our programs correspond to
+        Fuzzing is the idea that uniformly random inputs, the kind we would get from shuffled punched cards
+        or from piping <code>/dev/random</code> into our binaries is unlikely to find any but the most
+        trivial bugs. Almost all possible inputs will simply trip across some validation logic.
+    </p>
+    <p>
+        In an image parser it might be the bit that checks whether the file header starts with the four bytes
+        <code>\x89 p n g</code> - if not, it cannot be a valid PNG file. Your chance of random bytes matching that
+        string is 1 in 256<sup>4</sup>, less than one in a billion, and that's a fairly small number.
+    </p>
+    <p>
+        Instead of putting in uniformly random bytes, we can use a genetic algorithm. We instrument our
+        programs to watch the coverage, tell what behaviour is being executed, and then start by putting
+        in random things. When we find an input that does something we haven't seen before, we take that
+        input and mutate it a bit. Change it around, maybe combine it with another, put it back in,
+        and see what happens.
+    </p>
+    <p>
+        Pretty soon we're likely to find that an input which starts with <code>\x89</code> goes down a
+        different branch, then <code>\x89 p</code> is different again! Before you know it you've developed
+        this testing tool which will <a href="https://lcamtuf.blogspot.com/2014/11/pulling-jpegs-out-of-thin-air.html">
+            pull valid images out of thin air</a> just by watching the behaviour of the program
+        that's meant to deal with them.
+    </p>
+    <p>
+        So by using coverage feedback as a proxy for what the program is doing, we can drive up the
+        chance that we execute some part of the code which... crashes. That's the problem: the only
+        thing we can detect with conventional fuzzers is a crash.
+        The <i>second</i> part of this trick is a collection of ways to make bugs in our programs correspond to
         crashes instead of silent misbehaviour. In compiled languages there are many sanitizers which will
         do this - for addresses, for memory violations, for undefined behaviour; but the one that's common
-        across all languages including python is assertions.
+        across all languages including Python is assertions.
     </p>
     <p>
-        My favourite definition of an assertion is "a statement in a program which will do nothing unless
-        there is a bug". So an assertion is something which should always be true - but it might or might not
-        be executed depending on how you run Python. If it's false then it'll throw an assertion error and
-        that exception will propagate and you'll get a crash or your test will fail.
+        My <a href="https://blog.regehr.org/archives/1091">favourite definition of an assertion</a> is
+        "a statement in a program which will do nothing unless there is a bug". So an assertion is something
+        which should always be true - if it's false then it'll raise an <code>AssertionError</code>,
+        that exception will propagate, and you'll get a crash or your test will fail.
     </p>
     <p>
-        This means that when we evolve bad inputs we can check not just do we have some kind of error
-        which forces us to crash but do we trigger any assertion that we had. If you start and end your
-        functions with assertions that the input is roughly what you expect that the output is saying that
-        things round-trip or in canonical formats you can often uncover your own misunderstandings or your
-        future self's misunderstanding of past code simply by running the same tests against it.
+        This means that when we evolve bad inputs we can check not just "do we have a crash error"
+        but "do we trigger any assertions". If you start and end your functions with assertions that the
+        input is roughly what you expect, that data round-trips, or that it's in canonical form you can
+        often uncover your own misunderstandings or your future self's misunderstanding of past code
+        simply by running the same tests against it.
+    </p>
+    <p>
+        <a href="https://www.hillelwayne.com/post/contracts/">Asserting your API contracts</a> is therefore
+        <a href="https://www.hillelwayne.com/post/pbt-contracts/">a great design for testing</a>.
+        Just remember that <code>assert</code> statements
+        <a href="https://docs.python.org/3/reference/simple_stmts.html#assert"></a> might not run at all</a>,
+        and never rely on them to check user input.
     </p>
     <p>
         So that's part one! We can go from complete randomness to generating things which are very likely
         to find bugs which would seem impossible by mere chance.
     </p>
-    <img src="./img/outline-2.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/outline-2.jpg" alt="The outline slide, with part two - Inside Hypothesis - highlighted"
+        style="max-width:100%; height:auto;">
     <p>
-        So it's time to get back into Python a little more and I'm going to talk about the implementation of a
-        tool for property based testing I'm going to start by telling you what property based testing is not.
+        So it's time to get back into Python a little more, with the implementation of a tool for
+        property-based testing. I'm going to start by telling you what property based testing is not.
     </p>
-    <img src="./img/blns.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/blns.jpg"
+        alt="Examples from the 'big list of naughty strings', including SQL injection, XSS, and emoji"
+        style="max-width:100%; height:auto;">
     <p>
         Property based testing is not just trying a very large number of tests -
         though this is a super useful technique!
@@ -378,8 +414,8 @@
         <a href="https://docs.pytest.org/en/latest/parametrize.html"><code>@pytest.mark.parametrize</code></a>.
     </p>
     <p>
-        There are a couple of problems which would make us not want to do this for literally everything
-        though. The big one is that someone has to come up with the big list (and in this case they accept
+        There are a couple of reasons we might not want to do this for literally everything though.
+        The big one is that someone has to come up with the big list (though in this case they accept
         pull requests so you can help out). This is great for standard tools or protocols which have multiple
         implementations that can share a test suite, but without that it's just an awkward way to structure a
         conventional test suite.
@@ -389,7 +425,8 @@
         like those from a naive random generator, is better than nothing - but what if we could
         have the discovery power of randomness as well as minimal and reproducible examples?
     </p>
-    <img src="./img/pbt.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/pbt.jpg" alt="A game of Zendo, captioned 'property-based testing'"
+        style="max-width:100%; height:auto;">
     <!-- TODO: edit from here -->
     <p>
         Property based testing is the idea that when you combine random inputs and in property based
@@ -414,7 +451,8 @@
         across oncoming traffic. (I draw that example from a recent paper, which, ah... I don't want their
         self-driving cars)
     </p>
-    <img src="./img/wires.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/wires.jpg" alt="Stripped copper wires, labelled 'faster than a speeding packet!'"
+        style="max-width:100%; height:auto;">
     <p>
         At this point I owe you a really quick overview of Hypothesis itself.
     </p>
@@ -435,7 +473,9 @@
         Hypothesis runs your test function, and finally how Hypothesis generates inputs.
         This is completely backwards but I promise it makes more sense backwards than forwards.
     </p>
-    <img src="./img/reduction.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/reduction.jpg"
+        alt="Two figures on test-case reduction, showing intermediate steps in reducing an unbalanced binary tree"
+        style="max-width:100%; height:auto;">
     <p>
         Having found a bug with some random input - in the next section - our final challenge is to present
         a minimal reproducing example. This isn't just
@@ -443,7 +483,6 @@
         - understanding and debugging minimal examples is far easier than large ones. Since I can't come
         around to your office and hand-minimize every example for you, we need to automate that process!
     </p>
-    <!-- TODO: edit from here -->
     <p>
         Fortunately, dealing with strings of bytes under the hood means that we have a natural way to
         decide which of two examples is simpler, and also some generic simplifying operations. This is really
@@ -480,7 +519,9 @@
         While not strictly required for property based testing to be useful in practice, test case reduction is a
         really, really important feature to make people enjoy using the tool.
     </p>
-    <img src="./img/unit-targets.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/unit-targets.jpg"
+        alt="A code sample illustrating how a unit test function can be treated as a fuzz target"
+        style="max-width:100%; height:auto;">
     <p>
         Let's go through to the middle part here we think about how do we treat unit tests as if there were
         fuzz targets. I've said before right that we could think of any program potentially as taking some
@@ -499,7 +540,8 @@
         dictionaries are bytes everything is buts and so all we need to do is convert our bytes into some
         more meaningful value this is a known category of software and they're called parsers.
     </p>
-    <img src="./img/strategies.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/strategies.jpg" alt="Many HTML input widgets, labelled 'describing inputs'"
+        style="max-width:100%; height:auto;">
     <p>
         A parser is a program which takes a string, and converts it into structured values for us. My
         favourite API for creating parsers, which we use the Hypothesis, is parser combinators.
@@ -554,7 +596,8 @@
         premature optimization is the root of all frustration in testing - that's a lie there are lots of other
         frustrating things, but it will be frustrating - it's fast, it's certainly fast enough.
     </p>
-    <img src="./img/outline-3.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/outline-3.jpg" alt="The outline slide, with 'indistinguishable from magic' (section 3) highlighted"
+        style="max-width:100%; height:auto;">
     <p>
         Now we get to my favourite section of the talk the cutting edge techniques that to my knowledge
         are not available in Python nor widely used at all.
@@ -571,7 +614,8 @@
         that's it; the techniques have barely been tried at all. If you want to invest a week in trying to
         implement them you could get somewhere really cool.
     </p>
-    <img src="./img/swarm.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/swarm.jpg" alt="A swarm of cute ladybugs, labelled 'swarm testing'"
+        style="max-width:100%; height:auto;">
     <p>
         First technique: swarm testing. This one is unusual among the more advanced magical techniques in
         that it doesn't use any feedback or inspect your code at all. This one simply finds more bugs with
@@ -602,7 +646,8 @@
         use! We actually do plan to get around to it at some point, but we're all volunteers and have no free
         time so unless a sponsor appears it could be a long time.
     </p>
-    <img src="./img/targeting.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/targeting.jpg" alt="Dartboard with a bullseye, labelled 'Targeted PBT'"
+        style="max-width:100%; height:auto;">
     <p>
         Technique number two: targeted property based testing.
     </p>
@@ -640,7 +685,8 @@
         That said, Hypothesis added supported for targeted PBT in version 4.38 (2019-10-01) so you can try
         it out, and whether it works for you or not we'd love to hear about your experience.
     </p>
-    <img src="./img/symbolic.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/symbolic.jpg" alt="Zoomed-out view of a very complicated flow-chart, labelled 'symbolic execution'"
+        style="max-width:100%; height:auto;">
     <p>
         Third technique: symbolic execution.
     </p>
@@ -670,7 +716,8 @@
         behaviour of the CPython interpreter keeps changing when they keep working on it.
         All that said I really like symbolic execution. If only there was some way to make this work...
     </p>
-    <img src="./img/concolic.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/concolic.jpg" alt="Concrete being poured from a truck, labelled 'concolic execution'"
+        style="max-width:100%; height:auto;">
     <p>
         Concolic execution is where we combine concrete values and symbolic execution.
     </p>
@@ -698,7 +745,8 @@
         SAT-solvers almost always work anyway. It's in principle impossible that they always work, and yet
         they usually work! I have no idea how that happens but I am so so delighted that they exist.
     </p>
-    <img src="./img/programs.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/programs.jpg" alt="A listing of Python code, labelled 'constructing programs'"
+        style="max-width:100%; height:auto;">
     <p>
         The final technique which I will admit I am also really excited about is constructing programs. Not
         just a list of numbers, or some particular file format, but getting our property based testing library or
@@ -721,13 +769,16 @@
         corresponds to that syntax tree, so we could generate programs we could test our programming
         languages as well as the programs from writing them.
     </p>
-    <img src="./img/outline-4.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/outline-4.jpg" alt="The outline slide, with 'call to action' (section 4) highlighted"
+        style="max-width:100%; height:auto;">
     <p>
         Finally, I promised that we would have the section where I gave you something you could actually
         use! I've talked a lot about some cool tools and some great ideas, but can you actually use any of
         this stuff?
     </p>
-    <img src="./img/i-need-you.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/i-need-you.jpg"
+        alt="The 'Lord Kitchener Wants You' poster, text replaced with 'Your project needs you to write property tests!'"
+        style="max-width:100%; height:auto;">
     <p>
         I want you all to go back to work or wherever you're going on Monday and write some property
         based tests! Sound good?
@@ -736,7 +787,8 @@
         I'm getting some nods and some blank faces; you're probably thinking "Zac, you've told us how cool
         you think these are but you haven't told us how to actually write them" and you're right you know.
     </p>
-    <img src="./img/install.jpg" alt="" style="max-width:100%; height:auto;">
+    <img src="./img/install.jpg" alt="The Hypothesis dragonfly logo, and 'Step 1: Install Hypothesis'"
+        style="max-width:100%; height:auto;">
     <p>
         Step one is to install Hypothesis. You type in <code>pip install hypothesis</code>
         or if you prefer conda you type in <code>conda install hypothesis</code>.
@@ -879,7 +931,7 @@
         It turns out that two Python lists are equal if and only if each of their corresponding elements are
         equal so a list with nan in it would not be equal to itself because nan is not equal to itself... but
         Python has an optimization where if a list is compared to itself the comparison happens by identity,
-        so because "a is a" returns true because not a number breaks pythons object equality model and so
+        so because "a is a" returns true because not a number breaks Python's object equality model and so
         if you run this test it will duly spit out for you a list with a single floating point not a number in it.
     </p>
     <p>
