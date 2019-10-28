@@ -399,27 +399,56 @@
     <img src="img/pbt.jpg" class="slide" alt="A game of Zendo, captioned 'property-based testing'">
     <!-- TODO: edit from here -->
     <p>
-        Property based testing is the idea that when you combine random inputs and in property based
-        testing they're usually specified by the programmer in some way so instead of saying give me
-        literally anything you would say for example give me two integers between 0 and 100 and it would
-        try many combinations of those and then instead of asserting that your code output a particular
-        exact result which you don't know because you don't know what the exact input was you can make
-        some assertion about a general property for example no matter what data I get from the user
-        through this form I should be able to save it to the database and then bring it back and I should have
-        the same data no matter how many times they save it to the database and bring it back or you might
-        have something where if I convert it from JSON to XML then back to JSON I get the same data or this
-        becomes really powerful if you have other properties for example where reimplemented it we can
-        feed the same input into the old system and into the new system and assert that the new hotness
-        gets the same result as the legacy version or the single-threaded version has the same behaviour as
-        the multi-threaded version has anyone here ever been bitten by a multi-threading bug yeah it is a
-        useful test and there are other properties as well so for something like a scientific simulation where
-        the whole point of running it is we don't know what the output should be we might still have some
-        other clues in thermodynamics we would know that if we start with a higher initial temperature the
-        final temperature should probably also be higher and vice-versa if we're building a self-driving car
-        we might say we don't know exactly what it should do but if we simulate adding a rain drop to the
-        camera lens the car should not crash well the car should not confidently decide that it should turn
-        across oncoming traffic. (I draw that example from a recent paper, which, ah... I don't want their
-        self-driving cars)
+        The simplest property-based tests look a lot like fuzzing: you just get an input, call the
+        code you're testing, and see if it raises an exception. The first difference from fuzzing
+        is that the input is probably some kind of structured data (like "a string", or
+        "a list of integers") rather than raw bytes. More on that later.
+    </p>
+    <p>
+        Add assertions to the test function, and you can pick up the power of even the most expensive
+        contracts without runtime overhead. It's often possible to write more specific assertions
+        for a subset of possible inputs - for example, passing positive integers to a function
+        which accepts any real number, or sorted lists instead of shuffled.
+    </p>
+    <p>
+        The most powerful property-based tests are those which could not be expressed as contracts
+        of a single function call. For example, we might assert that:
+    </p>
+    <ul>
+        <li>If we call <code>sorted()</code> on its own output, nothing changes</li>
+        <li>Calling <code>json.loads()</code> on the output from <code>json.dumps()</code>
+            returns the original value</li>
+        <li>Changing the number of threads we run does not change the answer we get</li>
+    </ul>
+    <p>
+        There are <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">
+            many such properties</a>. Importantly, we don't always need to know the correct
+        answer - or even be able to check that the answer is correct - to find bugs, because
+        we can check the properties instead!
+    </p>
+    <p>
+        In extreme cases like simulations or machine learning, where we don't know how to relate
+        inputs to outputs, we can still use <a href="https://www.hillelwayne.com/post/metamorphic-testing/">
+            metamorphic testing</a>. Metamorphic relations exploit our knowledge of the purpose
+        over multiple executions of the software.
+    </p>
+    <ul>
+        <li>Changing the pagination should not change the results of a RESTful API call.</li>
+        <li>If we enter an arbitrary search term on an online store, then filter by a price range,
+            the second set of results should always be a subset of the first.
+        </li>
+        <li>Rotating an image should probably not change how each image is classified,
+            and classifying several images in a different order definitely shouldn't.
+        </li>
+        <li>Adding, removing, or editing non-connected components
+            <a href="https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-10-24">
+                in gene regulatory networks</a> should not affect the other components.
+        </li>
+    </ul>
+    <p>
+        So property-based testing gives you the power of fuzzing and the convenience of unit tests.
+        It can scale down to just calling your function, and all the way up to complex scientific
+        code and cutting-edge machine learning!
     </p>
     <img src="img/wires.jpg" class="slide" alt="Stripped copper wires, labelled 'faster than a speeding packet!'">
     <p>
@@ -863,7 +892,7 @@ def test_checkout_new_branch(branch_name):
         "master", and this test should pass.
     </p>
     <pre><code class="language-python">@given(repo=repositories(), branch_name=valid_branch_names())
-def test_checkout_new_branch(self, repo, branch_name):
+def test_checkout_new_branch(repo, branch_name):
     """Checking out a new branch makes it the active branch."""
     assume(branch_name not in repo.get_branches())
     repo.checkout(branch_name, create=True)
