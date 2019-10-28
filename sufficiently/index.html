@@ -1,124 +1,12 @@
-<html>
+<!DOCTYPE html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sufficiently Advanced Testing</title>
 
-<style>
-    body {
-        margin: 1em auto;
-        max-width: 40em;
-        padding: 0 .62em;
-        font: 1em/1.6 sans-serif;
-    }
-
-    code {
-        font: 1.2em/1.6 monospace;
-    }
-
-    h1,
-    h2,
-    h3 {
-        line-height: 1.2;
-    }
-
-    @media print {
-        body {
-            max-width: none
-        }
-    }
-
-    /* PrismJS 1.17.1  https://prismjs.com/download.html#themes=prism&languages=python
-    * prism.js default theme for JavaScript, CSS and HTML by Lea Verou, based on dabblet.com
-    * Modified by Zac Hatfield-Dodds; removed background etc.
-    */
-
-    pre[class*="language-"]::-moz-selection,
-    pre[class*="language-"] ::-moz-selection {
-        text-shadow: none;
-    }
-
-    @media print {
-
-        pre[class*="language-"] {
-            text-shadow: none;
-        }
-    }
-
-    /* Code blocks */
-    pre[class*="language-"] {
-        margin: 2em;
-        overflow: auto;
-    }
-
-    .token.comment,
-    .token.prolog,
-    .token.doctype,
-    .token.cdata {
-        color: slategray;
-    }
-
-    .token.punctuation {
-        color: #999;
-    }
-
-    .namespace {
-        opacity: .7;
-    }
-
-    .token.property,
-    .token.tag,
-    .token.boolean,
-    .token.number,
-    .token.constant,
-    .token.symbol,
-    .token.deleted {
-        color: #905;
-    }
-
-    .token.selector,
-    .token.attr-name,
-    .token.string,
-    .token.char,
-    .token.builtin,
-    .token.inserted {
-        color: #690;
-    }
-
-    .token.operator,
-    .token.entity,
-    .token.url,
-    .language-css .token.string,
-    .style .token.string {
-        color: #9a6e3a;
-    }
-
-    .token.atrule,
-    .token.attr-value,
-    .token.keyword {
-        color: #07a;
-    }
-
-    .token.function,
-    .token.class-name {
-        color: #DD4A68;
-    }
-
-    .token.regex,
-    .token.important,
-    .token.variable {
-        color: #e90;
-    }
-
-    .token.important,
-    .token.bold {
-        font-weight: bold;
-    }
-
-    .token.italic {
-        font-style: italic;
-    }
-</style>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <title>Sufficiently Advanced Testing</title>
+</head>
 
 <body>
     <script src="prism.js"></script><!-- Syntax highlighting magic for code blocks; CSS above -->
@@ -129,9 +17,8 @@
             (note: this is a rough draft; editing and hyperlinking remain on my todo list)
         </i>
     </p>
-    <img src="./img/title-white.jpg"
-        alt="The opening title slide reads 'Sufficiently Advanced Testing' by Zac Hatfield-Dodds, with the 3 A Institue and ANU logos."
-        style="max-width:100%; height:auto;">
+    <img src="img/title-white.jpg" class="slide"
+        alt="The opening title slide reads 'Sufficiently Advanced Testing' by Zac Hatfield-Dodds, with the 3 A Institue and ANU logos.">
     <p>
         Let's get into the deep dive talk that I proposed on sufficiently advanced testing.
         After PyCon Australia 2018, people <a href="https://2019.pycon-au.org/news/deep-dive-talks/">
@@ -151,9 +38,8 @@
         (yet!) have a corresponding tool in Python; to change how you think about testing; and right at the
         end to give you a single concrete takeaway you can actually implement.
     </p>
-    <img src="./img/outline-0.jpg"
-        alt="An outline showing 'State of the Art' (books icon), 'Inside Hypothesis' (our dragonfly logo), 'Sufficiently Advanced' (crossed wand-and-rocket), and 'call to action' (Rosie Riveter)"
-        style="max-width:100%; height:auto;">
+    <img src="img/outline-0.jpg" class="slide"
+        alt="An outline showing 'State of the Art' (books icon), 'Inside Hypothesis' (our dragonfly logo), 'Sufficiently Advanced' (crossed wand-and-rocket), and 'call to action' (Rosie Riveter)">
     <p>
         The talk is organised into four parts.
     </p>
@@ -174,8 +60,7 @@
         Last of all, I promised a concrete takeaway and so we'll finish with a call
         to action for something specific that you can do on Monday.
     </p>
-    <img src="./img/outline-1.jpg" alt="Outline showing only 'State of the Art', section one"
-        style="max-width:100%; height:auto;">
+    <img src="img/outline-1.jpg" class="slide" alt="Outline showing only 'State of the Art', section one">
     <p>
         For this talk I'm going to define testing as "any technique where you assess whether or not your
         code is correct, whether it's doing the right thing, by actually executing the code".
@@ -203,9 +88,8 @@
         request can be merged. The exact process of code review varies between projects, but the
         fundamental idea is that at least one other person thinks it's a good idea to merge that change.
     </p>
-    <img src="./img/imagination.jpg"
-        alt="A quote riffing on Thomas Schelling: 'No matter how rigorous her analysis or heroic his imagination, no person can write a test case that would never occur to them.'"
-        style="max-width:100%; height:auto;">
+    <img src="img/imagination.jpg" class="slide"
+        alt="A quote riffing on Thomas Schelling: 'No matter how rigorous her analysis or heroic his imagination, no person can write a test case that would never occur to them.'">
     <p>
         How exactly do we write tests? How do we work out how we execute our code?
     </p>
@@ -241,8 +125,7 @@
     <p>
         So what else could we do, to complement our auto-manual tests?
     </p>
-    <img src="./img/exhaustive.jpg" alt="An exhausted puppy, labelled 'Exhaustive Testing'"
-        style="max-width:100%; height:auto;">
+    <img src="img/exhaustive.jpg" class="slide" alt="An exhausted puppy, labelled 'Exhaustive Testing'">
     <p>
         One cute option is exhaustive testing. Conceptually this is really simple: all we do is we execute
         every possible behaviour of our code and we check that each one is correct!
@@ -263,8 +146,8 @@
         but we might well be able to test <i>enough</i>... and the oldest trick for this is simply to
         put complete garbage into the program and see what happens.
     </p>
-    <img src="./img/cards.jpg" alt="A pile of punched cards for a Jacquard loom, with words 'Garbage in, crashes out'"
-        style="max-width:100%; height:auto;">
+    <img src="img/cards.jpg" class="slide"
+        alt="A pile of punched cards for a Jacquard loom, with words 'Garbage in, crashes out'">
     <p>
         For any image parser, for any network library, and for most command line tools putting in random input
         should never cause it to crash. The program should either do something - hopefully something useful
@@ -296,8 +179,7 @@
         previously taken much longer for skilled workers. The resulting anti-tech backlash of 1779-1815
         led to the coining of the word <a href="https://en.wikipedia.org/wiki/Luddite">Luddite</a>.
     </p>
-    <img src="./img/randomness.jpg" alt="A pair of Viking-period dice, with words 'Randomness 101'"
-        style="max-width:100%; height:auto;">
+    <img src="img/randomness.jpg" class="slide" alt="A pair of Viking-period dice, with words 'Randomness 101'">
     <!-- TODO: edit from here -->
     <p>
         Time for a clarification: "randomness" can mean a couple of different things, and I realised while
@@ -354,8 +236,7 @@
     <p>
         With that digression about randomness let's go back to thinking about programs.
     </p>
-    <img src="./img/paths.jpg" alt="A complicated freeway interchange, words 'coverage of paths'"
-        style="max-width:100%; height:auto;">
+    <img src="img/paths.jpg" class="slide" alt="A complicated freeway interchange, words 'coverage of paths'">
     <p>
         How do we work out what programs actually do? One answer in Python, and in other languages, is
         to use tools which measure code coverage.
@@ -416,7 +297,7 @@
         decision - and one which you can <code>grep</code> for in your code base - about which parts
         of this code we decided we're OK with not testing at all.
     </p>
-    <img src="./img/fuzzing.jpg" alt="A fuzzy sheep and the word 'Fuzzing'" style="max-width:100%; height:auto;">
+    <img src="img/fuzzing.jpg" class="slide" alt="A fuzzy sheep and the word 'Fuzzing'">
     <p>
         When you put these ideas together tracking of coverage and then random inputs you get a
         technique called fuzzing.
@@ -471,22 +352,20 @@
         <a href="https://www.hillelwayne.com/post/contracts/">Asserting your API contracts</a> is therefore
         <a href="https://www.hillelwayne.com/post/pbt-contracts/">a great design for testing</a>.
         Just remember that <code>assert</code> statements
-        <a href="https://docs.python.org/3/reference/simple_stmts.html#assert"></a> might not run at all</a>,
+        <a href="https://docs.python.org/3/reference/simple_stmts.html#assert">might not run at all</a>,
         and never rely on them to check user input.
     </p>
     <p>
         So that's part one! We can go from complete randomness to generating things which are very likely
         to find bugs which would seem impossible by mere chance.
     </p>
-    <img src="./img/outline-2.jpg" alt="The outline slide, with part two - Inside Hypothesis - highlighted"
-        style="max-width:100%; height:auto;">
+    <img src="img/outline-2.jpg" class="slide" alt="The outline slide, with part two - Inside Hypothesis - highlighted">
     <p>
         So it's time to get back into Python a little more, with the implementation of a tool for
         property-based testing. I'm going to start by telling you what property based testing is not.
     </p>
-    <img src="./img/blns.jpg"
-        alt="Examples from the 'big list of naughty strings', including SQL injection, XSS, and emoji"
-        style="max-width:100%; height:auto;">
+    <img src="img/blns.jpg" class="slide"
+        alt="Examples from the 'big list of naughty strings', including SQL injection, XSS, and emoji">
     <p>
         Property based testing is not just trying a very large number of tests -
         though this is a super useful technique!
@@ -517,8 +396,7 @@
         like those from a naive random generator, is better than nothing - but what if we could
         have the discovery power of randomness as well as minimal and reproducible examples?
     </p>
-    <img src="./img/pbt.jpg" alt="A game of Zendo, captioned 'property-based testing'"
-        style="max-width:100%; height:auto;">
+    <img src="img/pbt.jpg" class="slide" alt="A game of Zendo, captioned 'property-based testing'">
     <!-- TODO: edit from here -->
     <p>
         Property based testing is the idea that when you combine random inputs and in property based
@@ -543,17 +421,16 @@
         across oncoming traffic. (I draw that example from a recent paper, which, ah... I don't want their
         self-driving cars)
     </p>
-    <img src="./img/wires.jpg" alt="Stripped copper wires, labelled 'faster than a speeding packet!'"
-        style="max-width:100%; height:auto;">
+    <img src="img/wires.jpg" class="slide" alt="Stripped copper wires, labelled 'faster than a speeding packet!'">
     <p>
         At this point I owe you a really quick overview of Hypothesis itself.
     </p>
-    <p>
+    <ul>
         <li>It's the leading Python library for property based testing.</li>
         <li>All of the core developers, including me, are volunteers.</li>
         <li>We have <a href="https://hypothesis.readthedocs.io">great documentation</a>
             and a strong focus on usability.</li>
-    </p>
+    </ul>
     <p>
         Whatever your concrete problem is that you need to solve with Hypothesis we have probably solved
         it and documented it... but this is not a talk about Hypothesis so much as a talk about the general
@@ -565,9 +442,8 @@
         Hypothesis runs your test function, and finally how Hypothesis generates inputs.
         This is completely backwards but I promise it makes more sense backwards than forwards.
     </p>
-    <img src="./img/reduction.jpg"
-        alt="Two figures on test-case reduction, showing intermediate steps in reducing an unbalanced binary tree"
-        style="max-width:100%; height:auto;">
+    <img src="img/reduction.jpg" class="slide"
+        alt="Two figures on test-case reduction, showing intermediate steps in reducing an unbalanced binary tree">
     <p>
         Having found a bug with some random input - in the next section - our final challenge is to present
         a minimal reproducing example. This isn't just
@@ -611,9 +487,8 @@
         While not strictly required for property based testing to be useful in practice, test case reduction is a
         really, really important feature to make people enjoy using the tool.
     </p>
-    <img src="./img/unit-targets.jpg"
-        alt="A code sample illustrating how a unit test function can be treated as a fuzz target"
-        style="max-width:100%; height:auto;">
+    <img src="img/unit-targets.jpg" class="slide"
+        alt="A code sample illustrating how a unit test function can be treated as a fuzz target">
     <p>
         Let's go through to the middle part here we think about how do we treat unit tests as if there were
         fuzz targets. I've said before right that we could think of any program potentially as taking some
@@ -632,8 +507,7 @@
         dictionaries are bytes everything is buts and so all we need to do is convert our bytes into some
         more meaningful value this is a known category of software and they're called parsers.
     </p>
-    <img src="./img/strategies.jpg" alt="Many HTML input widgets, labelled 'describing inputs'"
-        style="max-width:100%; height:auto;">
+    <img src="img/strategies.jpg" class="slide" alt="Many HTML input widgets, labelled 'describing inputs'">
     <p>
         A parser is a program which takes a string, and converts it into structured values for us. My
         favourite API for creating parsers, which we use the Hypothesis, is parser combinators.
@@ -688,8 +562,8 @@
         premature optimization is the root of all frustration in testing - that's a lie there are lots of other
         frustrating things, but it will be frustrating - it's fast, it's certainly fast enough.
     </p>
-    <img src="./img/outline-3.jpg" alt="The outline slide, with 'indistinguishable from magic' (section 3) highlighted"
-        style="max-width:100%; height:auto;">
+    <img src="img/outline-3.jpg" class="slide"
+        alt="The outline slide, with 'indistinguishable from magic' (section 3) highlighted">
     <p>
         Now we get to my favourite section of the talk the cutting edge techniques that to my knowledge
         are not available in Python nor widely used at all.
@@ -706,8 +580,7 @@
         that's it; the techniques have barely been tried at all. If you want to invest a week in trying to
         implement them you could get somewhere really cool.
     </p>
-    <img src="./img/swarm.jpg" alt="A swarm of cute ladybugs, labelled 'swarm testing'"
-        style="max-width:100%; height:auto;">
+    <img src="img/swarm.jpg" class="slide" alt="A swarm of cute ladybugs, labelled 'swarm testing'">
     <p>
         First technique: swarm testing. This one is unusual among the more advanced magical techniques in
         that it doesn't use any feedback or inspect your code at all. This one simply finds more bugs with
@@ -738,8 +611,7 @@
         use! We actually do plan to get around to it at some point, but we're all volunteers and have no free
         time so unless a sponsor appears it could be a long time.
     </p>
-    <img src="./img/targeting.jpg" alt="Dartboard with a bullseye, labelled 'Targeted PBT'"
-        style="max-width:100%; height:auto;">
+    <img src="img/targeting.jpg" class="slide" alt="Dartboard with a bullseye, labelled 'Targeted PBT'">
     <p>
         Technique number two: targeted property based testing.
     </p>
@@ -777,8 +649,8 @@
         That said, Hypothesis added supported for targeted PBT in version 4.38 (2019-10-01) so you can try
         it out, and whether it works for you or not we'd love to hear about your experience.
     </p>
-    <img src="./img/symbolic.jpg" alt="Zoomed-out view of a very complicated flow-chart, labelled 'symbolic execution'"
-        style="max-width:100%; height:auto;">
+    <img src="img/symbolic.jpg" class="slide"
+        alt="Zoomed-out view of a very complicated flow-chart, labelled 'symbolic execution'">
     <p>
         Third technique: symbolic execution.
     </p>
@@ -808,8 +680,7 @@
         behaviour of the CPython interpreter keeps changing when they keep working on it.
         All that said I really like symbolic execution. If only there was some way to make this work...
     </p>
-    <img src="./img/concolic.jpg" alt="Concrete being poured from a truck, labelled 'concolic execution'"
-        style="max-width:100%; height:auto;">
+    <img src="img/concolic.jpg" class="slide" alt="Concrete being poured from a truck, labelled 'concolic execution'">
     <p>
         Concolic execution is where we combine concrete values and symbolic execution.
     </p>
@@ -837,8 +708,7 @@
         SAT-solvers almost always work anyway. It's in principle impossible that they always work, and yet
         they usually work! I have no idea how that happens but I am so so delighted that they exist.
     </p>
-    <img src="./img/programs.jpg" alt="A listing of Python code, labelled 'constructing programs'"
-        style="max-width:100%; height:auto;">
+    <img src="img/programs.jpg" class="slide" alt="A listing of Python code, labelled 'constructing programs'">
     <p>
         The final technique which I will admit I am also really excited about is constructing programs. Not
         just a list of numbers, or some particular file format, but getting our property based testing library or
@@ -861,16 +731,14 @@
         corresponds to that syntax tree, so we could generate programs we could test our programming
         languages as well as the programs from writing them.
     </p>
-    <img src="./img/outline-4.jpg" alt="The outline slide, with 'call to action' (section 4) highlighted"
-        style="max-width:100%; height:auto;">
+    <img src="img/outline-4.jpg" class="slide" alt="The outline slide, with 'call to action' (section 4) highlighted">
     <p>
         Finally, I promised that we would have the section where I gave you something you could actually
         use! I've talked a lot about some cool tools and some great ideas, but can you actually use any of
         this stuff?
     </p>
-    <img src="./img/i-need-you.jpg"
-        alt="The 'Lord Kitchener Wants You' poster, text replaced with 'Your project needs you to write property tests!'"
-        style="max-width:100%; height:auto;">
+    <img src="img/i-need-you.jpg" class="slide"
+        alt="The 'Lord Kitchener Wants You' poster, text replaced with 'Your project needs you to write property tests!'">
     <p>
         I want you all to go back to work or wherever you're going on Monday and write some property
         based tests! Sound good?
@@ -879,8 +747,7 @@
         I'm getting some nods and some blank faces; you're probably thinking "Zac, you've told us how cool
         you think these are but you haven't told us how to actually write them" and you're right you know.
     </p>
-    <img src="./img/install.jpg" alt="The Hypothesis dragonfly logo, and 'Step 1: Install Hypothesis'"
-        style="max-width:100%; height:auto;">
+    <img src="img/install.jpg" class="slide" alt="The Hypothesis dragonfly logo, and 'Step 1: Install Hypothesis'">
     <p>
         <b>Step one</b> is to install Hypothesis. You type in <code>pip install hypothesis</code>
         or if you prefer conda you type in <code>conda install hypothesis</code>.
@@ -1115,7 +982,7 @@ def test_record_json_roundtrip(value):
     <p>
         Thank you very much.
     </p>
-    <img src="./img/title-black.jpg" alt="The title slide again, in dark mode" style="max-width:100%; height:auto;">
+    <img src="img/title-black.jpg" class="slide" alt="The title slide again, in dark mode">
 
     <h2>
         Questions from the audience:
