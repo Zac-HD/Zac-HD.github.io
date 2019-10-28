@@ -27,9 +27,101 @@
             max-width: none
         }
     }
+
+    /* PrismJS 1.17.1  https://prismjs.com/download.html#themes=prism&languages=python
+    * prism.js default theme for JavaScript, CSS and HTML by Lea Verou, based on dabblet.com
+    * Modified by Zac Hatfield-Dodds; removed background etc.
+    */
+
+    pre[class*="language-"]::-moz-selection,
+    pre[class*="language-"] ::-moz-selection {
+        text-shadow: none;
+    }
+
+    @media print {
+
+        pre[class*="language-"] {
+            text-shadow: none;
+        }
+    }
+
+    /* Code blocks */
+    pre[class*="language-"] {
+        margin: 2em;
+        overflow: auto;
+    }
+
+    .token.comment,
+    .token.prolog,
+    .token.doctype,
+    .token.cdata {
+        color: slategray;
+    }
+
+    .token.punctuation {
+        color: #999;
+    }
+
+    .namespace {
+        opacity: .7;
+    }
+
+    .token.property,
+    .token.tag,
+    .token.boolean,
+    .token.number,
+    .token.constant,
+    .token.symbol,
+    .token.deleted {
+        color: #905;
+    }
+
+    .token.selector,
+    .token.attr-name,
+    .token.string,
+    .token.char,
+    .token.builtin,
+    .token.inserted {
+        color: #690;
+    }
+
+    .token.operator,
+    .token.entity,
+    .token.url,
+    .language-css .token.string,
+    .style .token.string {
+        color: #9a6e3a;
+    }
+
+    .token.atrule,
+    .token.attr-value,
+    .token.keyword {
+        color: #07a;
+    }
+
+    .token.function,
+    .token.class-name {
+        color: #DD4A68;
+    }
+
+    .token.regex,
+    .token.important,
+    .token.variable {
+        color: #e90;
+    }
+
+    .token.important,
+    .token.bold {
+        font-weight: bold;
+    }
+
+    .token.italic {
+        font-style: italic;
+    }
 </style>
 
 <body>
+    <script src="prism.js"></script><!-- Syntax highlighting magic for code blocks; CSS above -->
     <p>
         <i>
             An edited transcript of <a href="https://2019.pycon-au.org/talks/sufficiently-advanced-testing">
@@ -790,38 +882,58 @@
     <img src="./img/install.jpg" alt="The Hypothesis dragonfly logo, and 'Step 1: Install Hypothesis'"
         style="max-width:100%; height:auto;">
     <p>
-        Step one is to install Hypothesis. You type in <code>pip install hypothesis</code>
+        <b>Step one</b> is to install Hypothesis. You type in <code>pip install hypothesis</code>
         or if you prefer conda you type in <code>conda install hypothesis</code>.
     </p>
     <p>
-        Hypothesis is compatible with every version of Python supported by the Python Software
-        Foundation. That means that we still support Python 2.7, but we will drop it at the end of this year
-        so if you are still using Python 2 you might want to think about moving to Python 3 soon.
-        Hypothesis is compatible with a wide range of other things. We have very few dependencies - just
-        "attrs" - but many optional extensions and quite a healthy community ecosystem of third-party
+        Hypothesis is compatible with every version of Python
+        <a href="https://devguide.python.org/#status-of-python-branches">
+            supported by the Python Software Foundation</a>.
+        That means that we still support Python 2.7, but we will drop it at the end of 2019!
+        Hypothesis is <a href="https://hypothesis.readthedocs.io/en/latest/supported.html">
+            compatible with a wide range of other things</a>. We have very few dependencies - just
+        <code>attrs</code> - but many optional extensions and quite a healthy community ecosystem of third-party
         libraries. If you use Numpy, Pandas, Django, or jsonschema, we have plugins that will deal with all of
         those for you.
     </p>
-
-    <!-- At this point I need to work out how to do the code-heave slides; images are suboptimal. -->
+    <h3>Step two: migrate a test</h3>
     <p>
-        Step two: migrate a single test. You probably have a test in your code base which at some point just
-        has an arbitrary value in it and you know that testing the add function could use more numbers than
-        just 1 and 2 but you're in a hurry right so you typed the simple ones or you didn't want to debug
-        really complicated ones and you were sure that 1 plus 2 should equal 3.
+        Let's walk through <a href="https://hypothesis.works/articles/incremental-property-based-testing/">
+            an example</a> to see how this works.
+    </p>
+    <pre><code class="language-python">def test_checkout_new_branch():
+    """Checking out a new branch makes it the active branch."""
+    tmpdir = FilePath(self.mktemp())
+    tmpdir.makedirs()
+    repo = Repository.initialize(tmpdir.path)
+    repo.checkout("new-branch", create=True)
+    self.assertEqual("new-branch", repo.get_active_branch())
+</code></pre>
+    <p>
+        You probably have a test in your code base which at some point just has an arbitrary value in it,
+        and you know that you could test more values if it wasn't such a pain to write them.
     </p>
     <p>
         Find a test that looks something like this. This test is simply that if we start a new git repository and
-        we create a branch called "new-branch" to checkout then the active branch will be the new branch.
+        we create and check out a branch called "new-branch", then the active branch will be the new branch.
         So what happens when we want to abstract that a little more, to generalize it and not only consider
         the literal name "new-branch"?
     </p>
+    <pre><code class="language-python">def test_checkout_new_branch(branch_name="new-branch"):
+    ...
+    repo.checkout(branch_name, create=True)
+    self.assertEqual(branch_name, repo.get_active_branch())
+</code></pre>
     <p>
         Well step one is simply to move arbitrary constants to keyword arguments. This test behaves
         identically to the old one; it doesn't depend on Hypothesis so you can do this before step one
         though step one is great. What we've got now is a variable which indicates the branch name and so
         our test semantically is saying given any branch name this should pass.
     </p>
+    <pre><code class="language-python">@given(branch_name=st.just("new-branch"))
+def test_checkout_new_branch(branch_name):
+    ...
+</code></pre>
     <p>
         The next step is to move that particular specific argument to a Hypothesis strategy. In this version
         we are using Hypothesis, we've got the "@given" decorator and we have the arguments to "@given"
@@ -833,23 +945,47 @@
         improve that strategy all of our tests will get more powerful so if our requirements change we have
         a single place where we can change to improve our tests.
     </p>
+    <pre><code class="language-python">def valid_branch_names():
+    # TODO: Improve this strategy.
+    return st.just("new-branch")
+ 
+@given(branch_name=valid_branch_names())
+def test_checkout_new_branch(branch_name): ...
+</code></pre>
     <p>
-        Then we can try generalizing the strategy. This is a strategy for arbitrary Unicode text I will give you
-        a spoiler and say that this one fails it turns out you can't name a git branch the empty string, you
-        can't name it space, you can't name it newline, you're probably not meant to name it master either -
-        but master is a valid branch string... if you actually read "man git-check-ref-format" [https://git-
-        scm.com/docs/git-check-ref-format] you will see that the rules are extremely complicated and that
-        they vary by both operating system and file system because branch names are also stored as file
-        names.
+        Then we can try generalizing the strategy.
+    </p>
+    <pre><code class="language-python">def valid_branch_names():
+    return st.text()
+</code></pre>
+    <p>
+        This is a strategy for arbitrary Unicode text. I will give you a spoiler and say that this one fails.
+        It turns out you can't name a git branch the empty string, you can't name it a space character,
+        you can't name it newline, and you're probably not meant to name it <code>"master"</code> -
+        but <code>"master"</code> <i>is</i> a valid branch name!
     </p>
     <p>
-        We're just gonna take the easy way out and say sure we want text but we only want ASCII letters not
+        If you read <a href="https://git-scm.com/docs/git-check-ref-format"><code>man git-check-ref-format</code></a>
+        you will see that the rules are extremely complicated, and that they vary by both operating system
+        and file system because branch names are also stored as file names.
+    </p>
+    <pre><code class="language-python">def valid_branch_names():
+    # TODO: improve this strategy to find some more bugs!
+    return st.text(alphabet=ascii_letters, min_size=1, max_size=95)
+</code></pre>
+    <p>
+        We're just gonna take the easy way out and say sure we want text but we only want ASCII letters, not
         even dashes or underscores because there are rules about how many dashes you can have in a row
-        and it turns out we need at least one letter, you can't have an empty string as the name, and no
+        and it turns out we need at least one letter. You can't have an empty string as the name, and no
         more than 95 letters because some get hosting websites arbitrarily cut off branch names at 100
         characters and branch names technically include "head/" as an implicit prefix so between 1 and 95
         letters gives us a valid git branch name.
     </p>
+    <pre><code class="language-python">@given(branch_name=valid_branch_names())
+def test_checkout_new_branch(branch_name):
+    assume(branch_name != "master")
+    ...
+</code></pre>
     <p>
         What do we do then it's at least possible that this will generate the string "master" being six
         characters and so we add at the top of our test function an assumption an assumption. "assume" is
@@ -859,6 +995,13 @@
         So we can make our assumption right we can say any sequence of letters, but not the sequence
         "master", and this test should pass.
     </p>
+    <pre><code class="language-python">@given(repo=repositories(), branch_name=valid_branch_names())
+def test_checkout_new_branch(self, repo, branch_name):
+    """Checking out a new branch makes it the active branch."""
+    assume(branch_name not in repo.get_branches())
+    repo.checkout(branch_name, create=True)
+    self.assertEqual(branch_name, repo.get_active_branch())
+</code></pre>
     <p>
         We've now refactored our test completely to use Hypothesis and chances are we've discovered and
         had to read something about the manual. It hadn't occurred to me wonder what was a valid branch
@@ -876,12 +1019,12 @@
         can also test for more complicated stuff.
     </p>
     <p>
-        I hope I've convinced you that you don't have to write these from scratch either you can find existing
-        tests and incrementally migrate them to take advantage of something like Hypothesis.
+        I hope I've convinced you that you don't have to start from scratch.
+        You can find and incrementally migrate existing tests to take advantage of Hypothesis.
     </p>
-
+    <h3>Step three: write a new test</h3>
     <p>
-        When you're ready to take that final third step, you can write a property-based test from scratch.
+        When you're ready to take that final third step, you can write an entirely new property-based test.
         For your first, I strongly recommend testing what we call a round-trip property. The best one is
         testing that when you write some data to a database or to disk and then read it you get the same
         thing back - this should be true no matter how you store files or put stuff in a database, since the
@@ -898,6 +1041,10 @@
         of some property; just testing that when you round-trip data it always comes back.
         Let's go see a worked example.
     </p>
+    <pre><code class="language-python">@given(value=st.none())
+def test_record_json_roundtrip(value):
+    assert value == json.loads(json.dumps(value))
+</code></pre>
     <p>
         We're testing that if we dump some value as a JSON string and then load that string interpreted as
         JSON to a value it's equal to the value we started with.
@@ -908,34 +1055,65 @@
         Incrementally we can improve that strategy. Let's look at None or Boolean or floats or text (Python
         3 strings, ie Unicode).
     </p>
+    <pre><code class="language-python">@given(
+    value=st.none() | st.booleans() | st.floats() | st.text()
+)
+def test_record_json_roundtrip(value):
+    assert value == json.loads(json.dumps(value))
+</code></pre>
     <p>
-        This version should not pass! There is a special floating point value called not a number which is
-        unequal to itself... numbers are equal to themselves but fortunately this float is not a number.
-        Again we can simply add an assumption: so we say for any value which is equal to itself if we write it
-        to JSON and then read it back to Python values the new value should be equal to the old value.
-        This passes, as it should, but all we're dealing with here is JSON scalars. If we have lists or
-        dictionaries, which JSON arrays and objects, we're not generating those and we're not testing them.
-        Fortunately with Hypothesis we can also generate recursive data!
+        This version should not pass! There is a special floating point value called
+        <a href="https://en.wikipedia.org/wiki/NaN">not a number</a> (or <code>nan</code>), which is
+        unequal to itself... numbers are equal to themselves but fortunately this float is not a number!
     </p>
+    <pre><code class="language-python">@given(...)
+def test_record_json_roundtrip(value):
+    assume(value == value)
+    assert value == json.loads(json.dumps(value))
+</code></pre>
+    <p>
+        We can simply add an assumption: for any value <i>which is equal to itself</i>,
+        when we serialize it to JSON and deserialize it, the new value should be equal.
+        This passes, as it should, but all we're dealing with here is scalars. If we have lists or
+        dictionaries, which JSON calls arrays and objects, we're not generating or testing those.
+        Fortunately Hypothesis can also generate recursive data!
+    </p>
+    <pre><code class="language-python">@given(
+    value=st.recursive(
+        st.none() | st.booleans() | st.floats() | st.text(),
+        lambda x: st.lists(x) | st.dictionaries(st.text(), x),
+    )
+)
+def test_record_json_roundtrip(value):
+    assume(value == value)
+    assert value == json.loads(json.dumps(value))
+</code></pre>
     <p>
         This strategy says starting with null or Booleans or floats or text we can take lists of whatever we
         have or dictionaries of strings to whatever it is we have and this recursive definition actually does
         describe all JSON. Feed it in to the same test, and...
     </p>
     <p>
-        It turns out this fails. I didn't know that this test fails until I was writing up a tutorial and I thought
-        this will be a good example, I'll incrementally write a property-based test and it will fail because we'll
-        get "nan" and that will show people why "assume" is useful.
+        It turns out this fails. I didn't know that this test fails until I was writing up a tutorial and I
+        thought "this will be a good example, I'll incrementally write a property-based test and use <code>nan</code>
+        to illustrate <code>assume()</code>", though I'd actually use <code>floats(allow_nan=False)</code>.
     </p>
     <p>
-        It turns out that two Python lists are equal if and only if each of their corresponding elements are
-        equal so a list with nan in it would not be equal to itself because nan is not equal to itself... but
-        Python has an optimization where if a list is compared to itself the comparison happens by identity,
-        so because "a is a" returns true because not a number breaks Python's object equality model and so
-        if you run this test it will duly spit out for you a list with a single floating point not a number in it.
+        Python lists are equal if and only if each of their corresponding elements are equal. Therefore, a list with
+        <code>nan</code> in it should therefore be unequal to itself, because <code>nan</code> is not equal to itself...
     </p>
     <p>
-        There we are folks: sufficiently advanced testing! Thank you very much.
+        But Python has an optimization: list equality starts with <code>if self is other: return True</code>
+        This is much faster and almost always correct, except that not a number breaks Python's object equality
+        model and so if you run this test Hypothesis will duly spit out <code>[nan]</code>, a list with a single
+        floating point not a number in it.
+    </p>
+    <p>
+        So writing this property-based test taught me something I didn't know about Python -
+        that's the power of sufficiently advanced testing!
+    </p>
+    <p>
+        Thank you very much.
     </p>
     <img src="./img/title-black.jpg" alt="The title slide again, in dark mode" style="max-width:100%; height:auto;">
 
@@ -1029,6 +1207,10 @@
         Install it first! The most effective way I've found is to migrate just a couple of tests.
         Spend an afternoon on it, and if you find a bug your teammates will care about,
         first get the bug report in and then tell them you found it with Hypothesis.
+    </p>
+    <p>
+        If you can convince enough people to get it running regularly in CI, incrementally adding
+        or migrating property-based tests as I showed earlier is usually pretty easy.
     </p>
     <p>
         <strong>
