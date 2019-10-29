@@ -263,7 +263,7 @@
     <p>
         <a href="https://coverage.readthedocs.io"><code>coverage</code></a>, one of the leading Python
         modules, hooks in to the interpreter and reports whether each line of code was it executed or not.
-        It also support branch coverage, and more recently can
+        It also supports branch coverage, and can even
         <a href="https://coverage.readthedocs.io/en/latest/contexts.html">
             attribute coverage to individual tests</a>!
     </p>
@@ -281,19 +281,18 @@
             but only a few love it.</i> I'm not a huge fan of using that as a metric either.
     </p>
     <p>
-        It's a good indicator of the rough state of your code base, but becomes problematic if you're
-        using a threshold for something like merge approvals. When you need at least 70%, 90%, whatever
-        percent coverage, unrelated refactorings can actually make that number go down. If you delete
-        trivial covered lines of code, code which is not doing anything useful but is still executed by tests
+        It's a good indicator of the rough state of your code base, but becomes problematic when
+        you treat a threshold like 70% or 95% coverage as a requirement to merge a pull request.
+        That's because unrelated refactorings can actually make that number go down - if you delete
+        trivial covered lines of code, code which is not doing anything useful but is still executed by tests,
         then you can make your coverage proportion worse. Maybe this is old-fashioned, but if I'm tracking
         some number that I think represents my code quality I don't want it to go down where
         my code quality goes up.
     </p>
     <p>
-        If you can, try to get coverage to spit out an exact number of uncovered
-        lines and mandate that that never passes a particular threshold or you can simply annotate your
-        code with no cover bits on the parts which you don't mind being uncovered and then require 100%
-        coverage. That's actually my preferred technique because it forces you to make an explicit
+        One alternative is to annotate your code to <a href="https://coverage.readthedocs.io/en/latest/excluding.html">
+            exclude the parts which you don't mind being uncovered</a>, then require 100% coverage
+        of everything else. That's actually my preferred technique because it forces you to make an explicit
         decision - and one which you can <code>grep</code> for in your code base - about which parts
         of this code we decided we're OK with not testing at all.
     </p>
@@ -397,7 +396,6 @@
         have the discovery power of randomness as well as minimal and reproducible examples?
     </p>
     <img src="img/pbt.jpg" class="slide" alt="A game of Zendo, captioned 'property-based testing'">
-    <!-- TODO: edit from here -->
     <p>
         The simplest property-based tests look a lot like fuzzing: you just get an input, call the
         code you're testing, and see if it raises an exception. The first difference from fuzzing
@@ -480,6 +478,7 @@
         - understanding and debugging minimal examples is far easier than large ones. Since I can't come
         around to your office and hand-minimize every example for you, we need to automate that process!
     </p>
+    <!-- TODO: edit from here -->
     <p>
         Fortunately, dealing with strings of bytes under the hood means that we have a natural way to
         decide which of two examples is simpler, and also some generic simplifying operations. This is really
@@ -611,15 +610,15 @@
     </p>
     <img src="img/swarm.jpg" class="slide" alt="A swarm of cute ladybugs, labelled 'swarm testing'">
     <p>
-        First technique: swarm testing. This one is unusual among the more advanced magical techniques in
-        that it doesn't use any feedback or inspect your code at all. This one simply finds more bugs with
-        the same property based tests that you already wrote!
+        First technique: <a href="https://www.cs.utah.edu/~regehr/papers/swarm12.pdf">swarm testing (pdf)</a>.
+        This one is unusual among the more magical techniques in that it doesn't use any feedback or inspect
+        your code at all. It simply finds more bugs with the same property-based tests that you already wrote!
     </p>
     <p>
         Traditionally, property based testing would do a basically uniform random exploration based on the
         state machine or the grammar of the inputs that were described. For integers any integer would be
         equally likely; if you are operating on a stack you will be about equally likely to push elements onto
-        the stack or pop them off, and so on. This means is you're extremely unlikely to exercise the really
+        the stack or pop them off, and so on. This means you're extremely unlikely to exercise the really
         weird edge cases - if it's equally likely that you add something or subtract something, it's very
         unlikely that you do fifty of one in a row and trigger some kind of overflow bug.
     </p>
@@ -637,26 +636,28 @@
     </p>
     <p>
         Why haven't we implemented this Hypothesis? We'd have to change the underlying model that we
-        use! We actually do plan to get around to it at some point, but we're all volunteers and have no free
+        use! We actually <a href="https://github.com/HypothesisWorks/hypothesis/issues/1637">
+            do plan to get around to it</a> at some point, but we're all volunteers and have no free
         time so unless a sponsor appears it could be a long time.
     </p>
     <img src="img/targeting.jpg" class="slide" alt="Dartboard with a bullseye, labelled 'Targeted PBT'">
     <p>
-        Technique number two: targeted property based testing.
+        Technique number two: <a href="http://proper.softlab.ntua.gr/Publications.html">
+            targeted property based testing</a>.
     </p>
     <p>
-        It's basically regular property based testing but we add one thing instead of tracking coverage the
-        way that fuzzers do we give users an extra part of the API a target function where they can feed in
-        some floating-point number to tell us how weird is this input how large is it how complex is it what's
-        the compression ratio and then the engine will preferentially mutate towards things which maximize
-        that metric longer lists lower compression ratios things which get higher antivirus scores and so just
-        as fuzzing evolves things based on the coverage or eventually the number of bugs that's already
-        found there we would then evolve inputs which tend to maximize whatever target metric you
-        choose to feed in.
+        It's basically regular property based testing but we add one thing: instead of tracking coverage the
+        way that fuzzers do, we give users a <code>target(score, label="")</code> function where they can feed in
+        some floating-point number to tell us how weird is this input. How large is it, how complex is it, what's
+        the compression ratio? Then the engine will preferentially mutate towards things which maximize
+        that metric - longer lists, lower compression ratios, things which get higher antivirus scores, and so just
+        as fuzzing evolves things based on the coverage, we would evolve inputs which tend to maximize
+        whatever target metric you choose to feed in.
     </p>
     <p>
         We actually tried doing this with coverage information in an earlier version of Hypothesis but
-        eventually took it out, for two reasons. First, while it was somewhat helpful running under coverage
+        <a href="https://github.com/HypothesisWorks/hypothesis/issues/1551">eventually took it out</a>,
+        for two reasons. First, while it was somewhat helpful running under coverage
         is slower than running without coverage and so when we looked at this we thought if what people
         want is to find many bugs per second or minute or hour of time that they spend running hypotheses
         often you would actually get more bugs if you run it with coverage disabled because it's four to five
@@ -664,19 +665,20 @@
         bugs we find.
     </p>
     <p>
-        Second, the way coverage is implemented in Python it uses a trace function so extra code is called
-        every time the stack frame changes in the interpreter and this means that it's incompatible with
-        many debuggers and the time you most need a debugger might in fact be when you found a bug and
-        it was kind of fragile so given that it wasn't helping much we took out the coverage based stuff but
+        Second, <code>coverage</code> is implemented using
+        <a href="https://docs.python.org/3/library/sys.html#sys.settrace"><code>sys.settrace()</code></a>,
+        so extra code is called every time the stack frame changes in the interpreter. It's also incompatible with
+        many debuggers and the time you most need a debugger might in fact be when you found a bug.
+        Given that it was fragile and wasn't helping much we took out the coverage based stuff, but
         we're quite excited about the possibility of targeted property based testing.
     </p>
     <p>
         In my opinion targeted PBT is a fairly fragile technique. While in certain situations it is impressively
         powerful it also relies on the use of choosing a useful target function and often there isn't a target
-        function which corresponds really well with bugginess so we might be able to drive to particular
-        extremes of our input space but whether or not that actually helps us find both is kind of unclear.
-        That said, Hypothesis added supported for targeted PBT in version 4.38 (2019-10-01) so you can try
-        it out, and whether it works for you or not we'd love to hear about your experience.
+        function which corresponds really well with bugginess - so while we might be able to drive to particular
+        extremes of our input space, whether that actually helps us find bugs is kind of unclear.
+        That said, Hypothesis <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-38-0">
+            now supports targeted PBT</a>, so you can try it out and let us know whether it helps.
     </p>
     <img src="img/symbolic.jpg" class="slide"
         alt="Zoomed-out view of a very complicated flow-chart, labelled 'symbolic execution'">
