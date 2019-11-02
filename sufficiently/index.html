@@ -143,7 +143,7 @@
     </p>
     <p>
         There is some hope though, because computers are really fast - we can't test <i>everything</i>,
-        but we might well be able to test <i>enough</i>... and the oldest trick for this is simply to
+        but we might well be able to test <i>enough</i>... and the oldest trick for this is to
         put complete garbage into the program and see what happens.
     </p>
     <img src="img/cards.jpg" class="slide"
@@ -257,8 +257,8 @@
     <p>
         There are many <a href="https://en.wikipedia.org/wiki/Code_coverage#Coverage_criteria">
             different coverage metrics you could use</a> with varying levels of detail
-        The simplest is function level - decorate each function, class, method, and module
-        and just see if it gets executed. This is fairly useful but in Python we can do better.
+        The simplest is function level - decorate each function, class, method, or module
+        and see if it gets executed. This is fairly useful but in Python we can do better.
     </p>
     <p>
         <a href="https://coverage.readthedocs.io"><code>coverage</code></a>, one of the leading Python
@@ -304,7 +304,8 @@
     <p>
         Fuzzing is the idea that uniformly random inputs, the kind we would get from shuffled punched cards
         or from piping <code>/dev/random</code> into our binaries is unlikely to find any but the most
-        trivial bugs. Almost all possible inputs will simply trip across some validation logic.
+        trivial bugs. Almost all possible inputs will trip across some validation logic before they have
+        any chance to trigger a bug.
     </p>
     <p>
         In an image parser it might be the bit that checks whether the file header starts with the four bytes
@@ -380,14 +381,14 @@
         left-to-right, and finally right-to-left again... but when I put it into my slides PowerPoint crashed!
         I don't mean to diminish the value of this kind of testing, and if you're dealing with things which
         should accept arbitrary strings as input you should definitely grab the big list of naughty strings and
-        try them all - it's really easy with something like
+        try them all - it doesn't take much code if you use something like
         <a href="https://docs.pytest.org/en/latest/parametrize.html"><code>@pytest.mark.parametrize</code></a>.
     </p>
     <p>
         There are a couple of reasons we might not want to do this for literally everything though.
         The big one is that someone has to come up with the big list (though in this case they accept
         pull requests so you can help out). This is great for standard tools or protocols which have multiple
-        implementations that can share a test suite, but without that it's just an awkward way to structure a
+        implementations that can share a test suite, but without that it's an awkward way to structure a
         conventional test suite.
     </p>
     <p>
@@ -397,7 +398,7 @@
     </p>
     <img src="img/pbt.jpg" class="slide" alt="A game of Zendo, captioned 'property-based testing'">
     <p>
-        The simplest property-based tests look a lot like fuzzing: you just get an input, call the
+        The simplest property-based tests look a lot like fuzzing: you get an input, call the
         code you're testing, and see if it raises an exception. The first difference from fuzzing
         is that the input is probably some kind of structured data (like "a string", or
         "a list of integers") rather than raw bytes. More on that later.
@@ -494,14 +495,14 @@
     </p>
     <p>
         Every input can be ranked in comparison to another candidate input and this means that it would be
-        valid to simply go this is the byte string that found a bug - let's try just chopping it in half does the
-        first half only find the same bug what about the second half and we can do a sequence of these
+        valid to take the byte string that found a bug and try chopping it in half. Does the
+        first half alone find the same bug? What about the second half? We can do a sequence of these
         operations analogously here the dotted lines between dots.
     </p>
     <p>
         Dots are executions of the test, the dashed lines indicate what we try to retake that input and make
         it smaller given any possible change to that input we can tell whether if the test still fails in the same
-        way it would in fact be simpler if it's not simple and we don't even have to run the test we can just
+        way it would in fact be simpler if it's not simple and we don't even have to run the test we can
         discard it and by running them we can slowly evolve our way down not necessarily to the simplest
         possible boat or the simplest possible input that triggers that bug but to a very much simpler one.
         Now there's a couple of benefits of this if we look at the diagram on the right of this binary tree all of
@@ -527,10 +528,10 @@
         second time that sucks when you're debugging right when you're never quite sure if you've fixed it
         or if it's just decided to go away until tomorrow or next week or 3:00 a.m. so first we replay all of the
         existing bugs and then we generate a bunch more random bits so we do the kind of mutation or
-        fuzzing and for each of them we just call the first target and if there's an exception then we grab
+        fuzzing and for each of them we call the first target and if there's an exception then we grab
         whatever input caused it and we do the reduction step making sense and so the only wrinkle here
         right is how do we go from strings of bytes to the objects and the values that we actually use in
-        Python and there's a couple of neat tricks the first is of course that in a computer everything is
+        Python and there's a couple of neat tricks the first is that in a computer everything is
         secretly bytes under the hood right numbers are bytes strings are bytes lists different bytes
         dictionaries are bytes everything is buts and so all we need to do is convert our bytes into some
         more meaningful value this is a known category of software and they're called parsers.
@@ -575,7 +576,7 @@
         what probability should we add one additional element then we draw a number and if it or draw a
         Boolean with that probability and if it's true then we get that element if it's false we're done and the
         list is over and that means that instead of having to delete or change two parts of the byte string in
-        combination at the same time we can simply delete a region and it will locally have that effect
+        combination at the same time we can delete a single region and it will locally have that effect
         defining test case reduction in terms of strategies rather than having to define something specific to
         for example each type of number gives us a couple of other examples if you imagine your test only
         takes even numbers for example with Hypothesis approach you can simply take the number and
@@ -612,7 +613,7 @@
     <p>
         First technique: <a href="https://www.cs.utah.edu/~regehr/papers/swarm12.pdf">swarm testing (pdf)</a>.
         This one is unusual among the more magical techniques in that it doesn't use any feedback or inspect
-        your code at all. It simply finds more bugs with the same property-based tests that you already wrote!
+        your code at all. It just finds more bugs with the same property-based tests that you already wrote!
     </p>
     <p>
         Traditionally, property based testing would do a basically uniform random exploration based on the
@@ -730,9 +731,9 @@
         variables in a Boolean formula can be replaced by either True or False and have the result be True.
         A SAT-solver will then use various heuristics and various special techniques to try to find some set of
         assignments to those variables which satisfies all of the equations. This is amazing because the
-        problem is NP-complete! That means that we can always check the answer efficiently (just do the
-        assignments and evaluate the formula), but there is no efficient way to find an answer - you just
-        have to try the exponential number of possibilities. (If I'm wrong, you've just proved P=NP and won
+        problem is NP-complete! That means that we can always check the answer efficiently (i.e. do the
+        assignments and evaluate the formula), but there is no efficient way to find an answer - you
+        have to try the exponential number of possibilities. (If I'm wrong, you've proved P=NP and won
         a million-dollar prize!)
     </p>
     <p>
@@ -812,10 +813,10 @@
         and you know that you could test more values if it wasn't such a pain to write them.
     </p>
     <p>
-        Find a test that looks something like this. This test is simply that if we start a new git repository and
-        we create and check out a branch called "new-branch", then the active branch will be the new branch.
-        So what happens when we want to abstract that a little more, to generalize it and not only consider
-        the literal name "new-branch"?
+        Find a test that looks something like this. This test is that if we start a new git repository and
+        we create and check out a branch called <code>"new-branch"</code>, then the active branch will be the
+        new branch. So what happens when we want to abstract that a little more, to generalize it and not only
+        consider the literal name <code>"new-branch"</code>?
     </p>
     <pre><code class="language-python">def test_checkout_new_branch(branch_name="new-branch"):
     ...
@@ -823,7 +824,7 @@
     self.assertEqual(branch_name, repo.get_active_branch())
 </code></pre>
     <p>
-        Well step one is simply to move arbitrary constants to keyword arguments. This test behaves
+        Well step one is to move arbitrary constants to keyword arguments. This test behaves
         identically to the old one; it doesn't depend on Hypothesis so you can do this before step one
         though step one is great. What we've got now is a variable which indicates the branch name and so
         our test semantically is saying given any branch name this should pass.
@@ -834,10 +835,12 @@ def test_checkout_new_branch(branch_name):
 </code></pre>
     <p>
         The next step is to move that particular specific argument to a Hypothesis strategy. In this version
-        we are using Hypothesis, we've got the "@given" decorator and we have the arguments to "@given"
-        corresponding with arguments to our test function. Our strategy just generates the string new
-        branch. We haven't changed the test semantically yet but we have started to use Hypothesis.
-        Then of course abstraction is great, don't repeat yourself, so we'll extract that out to a separate
+        we are using Hypothesis, we've got the <code>@given</code> decorator and we have the arguments to
+        <code>@given</code> corresponding with arguments to our test function. Our strategy can only generate the string
+        <code>"new-branch"</code>. We haven't changed the test semantically yet but we have started to use Hypothesis.
+    </p>
+    <p>
+        Then abstraction is great, don't repeat yourself, so we'll extract that out to a separate
         function which returns a strategy for valid branch names. This means that we could reuse the
         strategy across any test that's using the names of branches and when we eventually go back and
         improve that strategy all of our tests will get more powerful so if our requirements change we have
@@ -876,7 +879,7 @@ def test_checkout_new_branch(branch_name): ...
         even dashes or underscores because there are rules about how many dashes you can have in a row
         and it turns out we need at least one letter. You can't have an empty string as the name, and no
         more than 95 letters because some get hosting websites arbitrarily cut off branch names at 100
-        characters and branch names technically include "head/" as an implicit prefix so between 1 and 95
+        characters and branch names technically include <code>"head/"</code> as an implicit prefix so between 1 and 95
         letters gives us a valid git branch name.
     </p>
     <pre><code class="language-python">@given(branch_name=valid_branch_names())
@@ -885,13 +888,13 @@ def test_checkout_new_branch(branch_name):
     ...
 </code></pre>
     <p>
-        What do we do then it's at least possible that this will generate the string "master" being six
+        What do we do then it's at least possible that this will generate the string <code>"master"</code> being six
         characters and so we add at the top of our test function an assumption an assumption. "assume" is
         a function from Hypothesis which is much like an assertion, but instead of indicating that the test
         has failed it indicates that the input is problematic in some way and just tells Hypothesis look that
         one was okay but don't give it to me again and don't count that as a failure try again.
         So we can make our assumption right we can say any sequence of letters, but not the sequence
-        "master", and this test should pass.
+        <code>"master"</code>, and this test should pass.
     </p>
     <pre><code class="language-python">@given(repo=repositories(), branch_name=valid_branch_names())
 def test_checkout_new_branch(repo, branch_name):
@@ -903,16 +906,16 @@ def test_checkout_new_branch(repo, branch_name):
     <p>
         We've now refactored our test completely to use Hypothesis and chances are we've discovered and
         had to read something about the manual. It hadn't occurred to me wonder what was a valid branch
-        name in "git", because I always gave my things sensible branch names like "targeted-pbt" or
-        "working-on-that-bugfix" or "oh-no-why-is-this-happening".
+        name in <code>git</code>, because I always gave my things sensible branch names like
+        <code>"targeted-pbt"</code> or <code>"working-on-that-bugfix"</code>.
     </p>
     <p>
-        The end result once we finalize refactoring this we might have a strategy for repositories as well so
-        that instead of creating a new empty repository we actually say this property should be true of all of
+        The end result once we finalize refactoring this we might have a strategy for repositories as well.
+        Instead of creating a new empty repository, we can say that this property should be true of all of
         them and so it's not just the master branch that we want to exclude but we can say given any
         repository and any valid branch name if the branch name is not yet in the branches in the repository
-        then checking out that bridge means that the currently active bridge will be whichever one we just
-        checked out this is about as close to a genuinely mathematical property as you will see in code which
+        then checking out that branch means that the currently active branch will be whichever one we just
+        checked out. This is about as close to a genuinely mathematical property as you will see in code which
         is not doing simple data transformation. You can test that stuff too right it's great it's easy but you
         can also test for more complicated stuff.
     </p>
@@ -935,8 +938,8 @@ def test_checkout_new_branch(repo, branch_name):
     </p>
     <p>
         If you don't have a convenient pair of write and read functions, if you're working on a networking
-        thing a send and receive is quite similar, or if you're working on a simpler project a set and then a get
-        of some property; just testing that when you round-trip data it always comes back.
+        thing a send and receive is quite similar, or a set and then a get of some property;
+        in each case testing that when you round-trip data it always comes back.
         Let's go see a worked example.
     </p>
     <pre><code class="language-python">@given(value=st.none())
@@ -970,7 +973,7 @@ def test_record_json_roundtrip(value):
     assert value == json.loads(json.dumps(value))
 </code></pre>
     <p>
-        We can simply add an assumption: for any value <i>which is equal to itself</i>,
+        We can add an assumption: for any value <i>which is equal to itself</i>,
         when we serialize it to JSON and deserialize it, the new value should be equal.
         This passes, as it should, but all we're dealing with here is scalars. If we have lists or
         dictionaries, which JSON calls arrays and objects, we're not generating or testing those.
@@ -1076,7 +1079,7 @@ def test_record_json_roundtrip(value):
         <a href="https://hypothesis.readthedocs.io/en/latest/extras.html#hypothesis-lark">context-free grammars</a>,
         and a few others. There are <a href="https://hypothesis.readthedocs.io/en/latest/extras.html#hypothesis-lark">
             many more in third-party extensions</a>
-        and of course you can do it yourself: just write a function which takes some schema of whatever
+        and you can do it yourself too: just write a function which takes some schema of whatever
         kind and returns a strategy for things that match it.
         I don't think there's a thrift extension yet but nor do I think it'll be that hard to write your own.
     </p>
