@@ -481,23 +481,42 @@
     </p>
     <!-- TODO: edit from here -->
     <p>
-        Fortunately, dealing with strings of bytes under the hood means that we have a natural way to
-        decide which of two examples is simpler, and also some generic simplifying operations. This is really
-        important when looking at complex data like JSON: is a list simpler than a dictionary? We can
-        sidestep the problem by shrinking at the level of our bytes. The same trick gives us a total ordering
-        on inputs, and caching the byte string is a cheap if not exhaustive way to avoid repeating inputs.
-        So if we can find ourselves some strings of bytes, there are a couple of clear heuristics we could use
-        to sort them by simplicity. First, shorter strings of bytes are always simpler - minimal inputs are as
+        To do this, we need one or more operations that might simplify an example, and a way to decide which
+        of two examples is simpler. This is really important when looking at complex data like JSON: is a list
+        simpler than a dictionary?
+    </p>
+    <p>
+        Well, how was that value generated? In Hypothesis, every example is secretly based on a bytestring -
+        more on that later. Working with the underlying bytes lets us sidestep the question of whether a list
+        or a dictionary is simpler, because we can compare bytestrings based on two simple rules instead.
+    </p>
+    <p>
+        First, shorter strings of bytes are always simpler - minimal inputs are as
         small as possible! Second, for strings of the same length we use lexical order; comparing strings by
         the first unequal byte. We could use some other way of deciding between equal-length inputs, but
         lexical order corresponds to smaller unsigned big-endian integers and we have been careful to
         design our other strategies to match.
     </p>
     <p>
-        Every input can be ranked in comparison to another candidate input and this means that it would be
-        valid to take the byte string that found a bug and try chopping it in half. Does the
-        first half alone find the same bug? What about the second half? We can do a sequence of these
-        operations analogously here the dotted lines between dots.
+        We can sidestep the problem by shrinking at the level of our bytes: an example is simpler if the
+        bytestring is shorter (or represents a smaller integer), and our shrinking operations will be to
+        rearrange or delete sub-strings, reduce the value of certain bytes, and so on.
+    </p>
+    <p>
+        The same trick gives us operations which we can try to shrink <i>any</i> example: moving, deleting,
+        or replacing substrings. It's valid to try any such operation, because they all create bytestrings
+        that we could have generated randomly - and we can compare our candidate to the current best input,
+        and if it's not simpler we don't even need to run the test!
+    </p>
+    <p>
+        For example, it would be valid to take the byte string that found a bug and try chopping it in half.
+        Does the first half alone find the same bug? What about the second half? This trick is
+        <a href="https://en.wikipedia.org/wiki/Delta_debugging">delta debugging</a>, and it's amazingly effective.
+    </p>
+    <p>
+        In Hypothesis, we add a few operations which simplify examples without changing the length - this is
+        <a href="https://agroce.github.io/issta17.pdf">known as normalisation</a>, and it ensures that we get
+        the same minimal example no matter what example we started from. This is really helpful when debugging!
     </p>
     <p>
         Dots are executions of the test, the dashed lines indicate what we try to retake that input and make
