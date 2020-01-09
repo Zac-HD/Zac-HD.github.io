@@ -189,15 +189,15 @@
     </p>
     <p>
         When we talk about randomness in computing we might mean numbers which are truly
-        unpredictable they come out of some kind of physical phenomenon that we can't predict, so we
-        can't guess what the next number will be.
+        unpredictable: they come out of some kind of physical phenomenon and even in principle we can't
+        guess what the next number will be. That's a "true" random number generator!
     </p>
     <p>
-        (One of the coolest sources of randomness on the internet is at CloudFlare headquarters: they seed
-        some of their random number generators with a webcam and a wall full of lava lamps. So there is
-        this wall full of lava lamps that helps keep the internet secure and I just love that but if you don't
-        have a wall full of lava lamps handy there are still ways that you can get numbers which are
-        sufficiently random.)
+        (One of the coolest sources of randomness on the internet is at CloudFlare headquarters: they
+        <a href="https://blog.cloudflare.com/lavarand-in-production-the-nitty-gritty-technical-details/">
+            seed their random number generators with a wall full of lava lamps</a>.
+        So a wall of lava lamps helps keep the internet secure, and I just love that - even if you could
+        still get sufficently unpredictable numbers without a lava lamp handy.)
     </p>
     <p>
         Or maybe you're even doing something like a statistical experiment or a simulation you want to be
@@ -207,25 +207,16 @@
         generators.
     </p>
     <p>
-        and so these are very complicated programs which will jump around the numbers in a very
-        unpredictable way but if you set the internal state to something particular you'll always get the same
-        sequence of numbers out when you drive it so Python's random module is actually a pseudo-random
-        number generator and if you're thinking of doing something with security you should not use it
-        because it's not truly random you should instead use the secrets module which is suitable for secret
-        things that's because Python doesn't have what's called a cryptographically secure pseudo-random
-        number generator which is far too many words to describe a simple thing it's a sequence of numbers
-        where you can't predict what number will be next ever simply by observing them I think that's
-        probably enough now.
-    </p>
-    <p>
         This is a set of dice. Depending on how you count it, they might be random, pseudorandom, or not
         really random at all! The interesting thing about dice is you might think that there's an even chance
         of each number coming up each time they are rolled, but if you have dice like this that are not
         perfect cubes tossed by an unbiased hand, certain sides will come to rest face up more often than
-        others. If you have a heavy die for example with divots cut out to indicate the numbers, even if you
-        roll it completely randomly it is slightly more likely to land with the six upwards was that side is
-        slightly lighter but we wouldn't say that the die is non-random we would say that the die does not
-        have a uniform distribution.
+        others.
+    </p>
+    <p>
+        If you have a heavy die for example with divots cut out to indicate the numbers, it's slightly more
+        likely to land with the six upwards, because that side is a little lighter. I'd still call that
+        random though - just with a non-uniform probability distribution.
     </p>
     <p>
         So for a thing to be random it is not necessary that every possible outcome be equally likely or have
@@ -479,34 +470,40 @@
         - understanding and debugging minimal examples is far easier than large ones. Since I can't come
         around to your office and hand-minimize every example for you, we need to automate that process!
     </p>
-    <!-- TODO: edit from here -->
     <p>
-        To do this, we need one or more operations that might simplify an example, and a way to decide which
-        of two examples is simpler. This is really important when looking at complex data like JSON: is a list
-        simpler than a dictionary?
+        All we need is one or more operations to any example that make it simpler... or we can combine
+        operations that <i>might</i> simplify examples with a way to sort examples by simplicity.
+        But how can we sort examples, when the examples are values that Python can't sort?
     </p>
     <p>
-        Well, how was that value generated? In Hypothesis, every example is secretly based on a bytestring -
-        more on that later. Working with the underlying bytes lets us sidestep the question of whether a list
-        or a dictionary is simpler, because we can compare bytestrings based on two simple rules instead.
+        This is important when looking at complex data like JSON - is a list simpler than a dictionary? -
+        but gets <i>really</i> hard when we're looking at sequences of actions rather than values!
     </p>
     <p>
-        First, shorter strings of bytes are always simpler - minimal inputs are as
-        small as possible! Second, for strings of the same length we use lexical order; comparing strings by
-        the first unequal byte. We could use some other way of deciding between equal-length inputs, but
-        lexical order corresponds to smaller unsigned big-endian integers and we have been careful to
-        design our other strategies to match.
+        Hypothesis has a way out: every example is internally based on a bytestring - I'll explain how that
+        works in a minute. Working with the underlying bytes lets us sidestep the question of whether a list
+        or a dictionary is simpler, because we can compare the underlying bytestrings instead.
     </p>
     <p>
-        We can sidestep the problem by shrinking at the level of our bytes: an example is simpler if the
-        bytestring is shorter (or represents a smaller integer), and our shrinking operations will be to
-        rearrange or delete sub-strings, reduce the value of certain bytes, and so on.
+        Python uses a <a href="https://en.wikipedia.org/wiki/Lexicographical_order">lexicographic</a>
+        ordering for bytestrings (and unicode strings), which doesn't quite suit Hypothesis. We use
+        <a href="https://en.wikipedia.org/wiki/Shortlex_order">shortlex order</a>, which means that
+        shorter bytestrings are always considered simpler, and we fall back to the standard lexicographic
+        order between strings of the same length.
     </p>
     <p>
-        The same trick gives us operations which we can try to shrink <i>any</i> example: moving, deleting,
-        or replacing substrings. It's valid to try any such operation, because they all create bytestrings
-        that we could have generated randomly - and we can compare our candidate to the current best input,
-        and if it's not simpler we don't even need to run the test!
+        We could use some other way of deciding between equal-length inputs, but we've carefully designed
+        all our strategies to shrink well under shortlex ordering. For example, if we put our bytestring
+        into <a href="https://docs.python.org/3/library/stdtypes.html#int.from_bytes">
+            <code>int.from_bytes(..., byteorder="big", signed=False)</code></a> shrinking in shortlex order
+        will generate smaller integers.
+    </p>
+    <p>
+        Thinking of examples at the level of bytestrings also gives us operations which we can try to shrink
+        <i>any</i> example: moving, deleting, or replacing substrings. It's valid to try any such operation,
+        because the resulting bytestring <i>could</i> have been generated randomly and
+        <a href="https://hypothesis.works/articles/integrated-shrinking/">must therefore be valid</a>.
+        We can also compare our candidate to the current best input, and skip running the test if it's worse!
     </p>
     <p>
         For example, it would be valid to take the byte string that found a bug and try chopping it in half.
@@ -519,24 +516,12 @@
         the same minimal example no matter what example we started from. This is really helpful when debugging!
     </p>
     <p>
-        Dots are executions of the test, the dashed lines indicate what we try to retake that input and make
-        it smaller given any possible change to that input we can tell whether if the test still fails in the same
-        way it would in fact be simpler if it's not simple and we don't even have to run the test we can
-        discard it and by running them we can slowly evolve our way down not necessarily to the simplest
-        possible boat or the simplest possible input that triggers that bug but to a very much simpler one.
-        Now there's a couple of benefits of this if we look at the diagram on the right of this binary tree all of
-        these will say trigger the same bug and going around clockwise we've simplified it and by the time
-        you see the one on the bottom left if you look at that and you think I have some bug in a binary tree
-        function the bug might be related to the fact that the binary tree is unbalanced and in particular
-        when you look at that you can go if it was possible to simplify it further it would have been simplified
-        further so it must be something about the unbalanced nature of the tree.
-    </p>
-    <p>
         While not strictly required for property based testing to be useful in practice, test case reduction is a
         really, really important feature to make people enjoy using the tool.
     </p>
     <img src="img/unit-targets.jpg" class="slide"
         alt="A code sample illustrating how a unit test function can be treated as a fuzz target">
+    <!-- TODO: edit from here -->
     <p>
         Let's go through to the middle part here we think about how do we treat unit tests as if there were
         fuzz targets. I've said before right that we could think of any program potentially as taking some
@@ -655,10 +640,8 @@
         or how cute ladybugs are.
     </p>
     <p>
-        Why haven't we implemented this Hypothesis? We'd have to change the underlying model that we
-        use! We actually <a href="https://github.com/HypothesisWorks/hypothesis/issues/1637">
-            do plan to get around to it</a> at some point, but we're all volunteers and have no free
-        time so unless a sponsor appears it could be a long time.
+        We added swarm testing in <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-49-0">
+            Hypothesis 4.49, in November 2019</a>, a few months after I gave this talk.
     </p>
     <img src="img/targeting.jpg" class="slide" alt="Dartboard with a bullseye, labelled 'Targeted PBT'">
     <p>
@@ -736,18 +719,24 @@
         Concolic execution is where we combine concrete values and symbolic execution.
     </p>
     <p>
-        It's a bait-and-switch right we do symbolic execution for a while and this is really cool and
-        mathematical and abstract and then we're like oh no we have no idea what to do here we work out
-        well what kind of specific actual Python value would have made it through this sequence of branches
-        to get here then you generate it and you call the code and you see what happens it's total cheating
-        and it's awesome.
+        It's a bait-and-switch: we do symbolic execution for a while, everything is nice and abstract,
+        and then eventually we get stuck. At that point we calculate a specific Python value would have made
+        it through this sequence of branches to get here - and then call the code with that value and see
+        what happens! It's totally cheating and it's awesome.
     </p>
     <p>
-        To my knowledge no one is doing this for Python at all but it seems like it would be really cool!
+        To my knowledge no one is doing this for Python at all - there are a
+        <a href="https://github.com/bannsec/pySym">couple</a> of
+        <a href="https://github.com/thomasjball/PyExZ3">prototypes</a> but nothing production-ready.
+        Python is a complicated and dynamic language, but it would be really cool to get this working!
+    </p>
+    <p>
         Because the chain of branches can get very complex, in practice we usually use what's called a SAT-
-        solver to work out what combination of values would actually get to a particular part of our code. A
-        SAT-solver is a thing which solves the Boolean satisfiability problem - in short, whether each of the
+        solver to work out what combination of values would actually get to a particular part of our code.
+        A SAT-solver is a thing which solves the Boolean satisfiability problem - in short, whether each of the
         variables in a Boolean formula can be replaced by either True or False and have the result be True.
+    </p>
+    <p>
         A SAT-solver will then use various heuristics and various special techniques to try to find some set of
         assignments to those variables which satisfies all of the equations. This is amazing because the
         problem is NP-complete! That means that we can always check the answer efficiently (i.e. do the
@@ -778,9 +767,16 @@
         foiled by the reference implementation!
     </p>
     <p>
-        We could instead try to generate a syntax tree and then work out what programs source code
-        corresponds to that syntax tree, so we could generate programs we could test our programming
-        languages as well as the programs from writing them.
+        If this sounds cool, <a href="https://pypi.org/project/hypothesmith/">you can use Hypothesmith too</a>!
+        (punning on the more famous <a href="https://embed.cs.utah.edu/csmith/">CSmith</a>)
+    </p>
+    <p>
+        The main challenge is that almost all syntactically-valid programs are semantically invalid,
+        <a href="https://blog.regehr.org/archives/1039">which limits what we can test with them</a>.
+        One promising approach is to <a href="https://github.com/Zac-HD/hypothesmith/issues/2">
+            generate and 'unparse' a typed syntax tree</a> - in particular, this could guarantee by
+        construction that it's safe to execute the generated programs... so we could systematically
+        compare Python interpreters as well as our development tools.
     </p>
     <img src="img/outline-4.jpg" class="slide" alt="The outline slide, with 'call to action' (section 4) highlighted">
     <p>
