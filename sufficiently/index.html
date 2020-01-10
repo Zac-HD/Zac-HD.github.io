@@ -9,14 +9,14 @@
 </head>
 
 <body>
-    <script src="prism.js"></script><!-- Syntax highlighting magic for code blocks; CSS above -->
-    <p>
+    <script src="prism.js"></script><!-- Syntax highlighting magic for code blocks; CSS in /style.css -->
+    <p style="text-align:center">
         <i>
             An edited transcript of <a href="https://2019.pycon-au.org/talks/sufficiently-advanced-testing">
                 my talk at PyCon Australia 2019</a>. More about me <a href="..">on my homepage</a>.
-            (note: this is a rough draft; editing and hyperlinking remain on my todo list)
         </i>
     </p>
+    <hr>
     <img src="img/title-white.jpg" class="slide"
         alt="The opening title slide reads 'Sufficiently Advanced Testing' by Zac Hatfield-Dodds, with the 3 A Institue and ANU logos.">
     <p>
@@ -521,29 +521,52 @@
     </p>
     <img src="img/unit-targets.jpg" class="slide"
         alt="A code sample illustrating how a unit test function can be treated as a fuzz target">
-    <!-- TODO: edit from here -->
     <p>
-        Let's go through to the middle part here we think about how do we treat unit tests as if there were
-        fuzz targets. I've said before right that we could think of any program potentially as taking some
-        string of bytes as input and doing something and so that's effectively what we do Hypothesis gives
-        you a decorator which internally wraps the test and we'll try first of all rerunning every previous byte
-        string that we've seen caused some particular bug so you don't have the usual problem of random
-        tests that if you execute the test and they're executed again the bug may or may not happen the
-        second time that sucks when you're debugging right when you're never quite sure if you've fixed it
-        or if it's just decided to go away until tomorrow or next week or 3:00 a.m. so first we replay all of the
-        existing bugs and then we generate a bunch more random bits so we do the kind of mutation or
-        fuzzing and for each of them we call the first target and if there's an exception then we grab
-        whatever input caused it and we do the reduction step making sense and so the only wrinkle here
-        right is how do we go from strings of bytes to the objects and the values that we actually use in
-        Python and there's a couple of neat tricks the first is that in a computer everything is
-        secretly bytes under the hood right numbers are bytes strings are bytes lists different bytes
-        dictionaries are bytes everything is buts and so all we need to do is convert our bytes into some
-        more meaningful value this is a known category of software and they're called parsers.
+        Now that we know we can think of any example as a bytestring, we can treat our unit tests
+        as fuzz targets. This immediately gives us a variety of options for searching for bugs,
+        from systematic to heuristic to random, and a fantastic workflow for reproducing test failures.
+    </p>
+    <p>
+        A fuzz target is just a function that takes a single argument (a bytestring) as an input, and
+        raises an exception if there's a bug. So the first thing Hypothesis' <code>@given()</code>
+        decorator does is compose your function with the "strategies" that describe what inputs are valid.
+    </p>
+    <p>
+        The <i>second</i> wrapper, the test function that you or your test runner actually calls, is
+        a simple fuzzing engine:
+    </p>
+    <ol>
+        <li>
+            First, we run each of the explict <code>@example(...)</code> inputs.
+            This isn't part of the fuzzing workflow, but very useful for edge cases or rare bugs.</li>
+        <li>
+            Second, we replay any failures that previous runs stored in the <code>.hypothesis</code>
+            example database, and a selection of other interesting cases. Random testing usually has
+            an awful problem where reexecuting a test that found a bug may or may not find it again.
+            That sucks when you're debugging - you're never quite sure if you've fixed it, or the test
+            is flaky and the bug will be back tomorrow at 3:00 am. Using the database makes that impossible!
+        </li>
+        <li>
+            If we haven't found any failures yet, it's time to generate some new examples! Conceptually,
+            we could just take <a href="https://docs.python.org/3/library/random.html#random.getrandbits">
+                <code>random.getrandbits()</code></a>, but in most tests not all bytestrings are valid -
+            for example <code>integers(0, 130)</code> needs eight bits, but the top bit must usually be zero.
+            Hypothesis has a variety of tricks that help with this, from retrying small sections to copying
+            and mutating other examples to outright calculating a valid example if we know some constraints.
+        </li>
+        <li>
+            Finally, we shrink to the minimal example of each bug we've found as I described earlier.
+        </li>
+    </ol>
+    <p>
+        So the last thing we need is a nice API that can take a bytestring and turn it into arbitrary
+        user-specified values... ideally without even making the user think about bytestrings at all.
     </p>
     <img src="img/strategies.jpg" class="slide" alt="Many HTML input widgets, labelled 'describing inputs'">
     <p>
-        A parser is a program which takes a string, and converts it into structured values for us. My
-        favourite API for creating parsers, which we use the Hypothesis, is parser combinators.
+        Fortunately, the problem of turning bytes into values is a well-studied problem, and programs
+        that do this are called <i>parsers</i>. My favourite API for creating parsers, which we use in
+        Hypothesis, is parser combinators.
     </p>
     <p>
         A parser combinator is a function which takes a couple of different, smaller, parsers and sticks them
@@ -553,53 +576,54 @@
         integers you combine the lists parser with an integers parser.
     </p>
     <p>
-        This is exactly how it works in Hypothesis: "integers()" for integers, "lists(integers())" for lists of
-        integers, and so on. "lists()" also takes optional arguments like min_size=3, unique=True, and so on.
-    </p>
-
-    <p>
-        Under the hood we implement strategies in the private API as classes which just have a get bits
-        function so all they do is look at the next part of the input and then convert that if they can into
-        whatever their output type is most of the strategies that we provide though don't even have to do
-        that we can implement them in terms of other strategies and that's the public API to you define your
-        own strategies for whatever type or class or collection or specific kind of data you need to call so
-        below that there are a couple of other tricks we use and I'm skipping over so much of the cool stuff
-        about how you can generate Django models or Pandas data frames or things accepted by a regular
-        expression -
-        you can take a regular expression and Hypothesis will give you strings that match the regular
-        expression it's super cool and that bit wasn't in my notes it's just so exciting -
-        under the hood there are a couple of implementation tricks that are quite important the first is that
-        whenever you define a strategy if you're in the internal API or the public API we make sure this
-        mostly doesn't matter but internally we try to implement all of our strategies in a way that shrinks
-        well that allows the reducer to make progress using the operations that it knows about so one
-        example of this is when we're generating a list of something the natural way to do this might be first
-        get a number to decide how long the list will be and then get that many elements and put them in a
-        list the problem is when it comes to reduce it to successfully reduce that one you would have to
-        simultaneously reduce them integer by one and delete a list element and in general this is going to
-        be less efficient than what we actually do which is we calculate given our expected list length with
-        what probability should we add one additional element then we draw a number and if it or draw a
-        Boolean with that probability and if it's true then we get that element if it's false we're done and the
-        list is over and that means that instead of having to delete or change two parts of the byte string in
-        combination at the same time we can delete a single region and it will locally have that effect
-        defining test case reduction in terms of strategies rather than having to define something specific to
-        for example each type of number gives us a couple of other examples if you imagine your test only
-        takes even numbers for example with Hypothesis approach you can simply take the number and
-        then multiply it by two and that strategy will then only give you even numbers but when it shrinks
-        every number it tries to produce will still be even if you're using something like quick check in
-        Haskell you actually have to put another filter in place in your test to make sure that when you
-        generated even numbers it didn't try to shrink by feeding you odd numbers that tends to get you
-        unrelated errors which is not fun when you're debugging.
+        This is exactly how it works in Hypothesis: <code>integers()</code> for integers,
+        <code>lists(integers())</code> for lists of integers, and so on. <code>integers()</code> has optional
+        arguments for the minimum and maximum value to generate; <code>lists(...)</code> takes optional arguments
+        to control the size and uniqueness of the generated lists, and so on - because they're parsers,
+        <a href="https://hypothesis.works/articles/integrated-shrinking/">strategies are more precise than types</a>.
     </p>
     <p>
-        If you're wondering about the performance of this come talk to me in the hallway track but in short
-        premature optimization is the root of all frustration in testing - that's a lie there are lots of other
-        frustrating things, but it will be frustrating - it's fast, it's certainly fast enough.
+        As well as all the core strategies for builtin and standard-library types and the functions to define
+        custom strategies like <code>@st.composite</code>, or <code>st.builds(YourClass, ...)</code>, or
+        <code>st.one_of(strategies)</code>, Hypothesis ships with "extras" to integrate with other libraries.
+        If you use Numpy, Pandas, or Django we have you covered; and there are third-party extensions like
+        <a href="https://pypi.org/project/hypothesis-jsonschema/"><code>hypothesis-jsonschema</code></a> too
+        - one of many functions that take a schema of some kind a return a corresponding strategy.
+        For example, <code>st.from_regex("^\d{4}-\d\d-\d\d$")</code> will generate ISO8601 date strings,
+        and <code>st.from_type(Callable[..., List[int]])</code> will generate functions which return lists
+        of integers!
+    </p>
+    <p>
+        Back to parsers: the "leaves" are part of our private API, which goes all the way down the stack to a
+        <code>get_bits()</code> function, but even we try stick to composing strategies using the public API -
+        it's much nicer to work with!
+    </p>
+    <p>
+        The only exceptions are for very low level strategies where there's nothing to compose, or for
+        cases like <code>sets(sampled_from(long_lst), min_size=almost_len_of_lst)</code>.
+        This would take quadratic time ("be unusably slow") if we chose each element independently,
+        but by using some fancy data structures to track which elements are still allowed we can
+        generate a list of unique elements in linear time instead.
+    </p>
+    <p>
+        We also design our parsers and combinators to work well with the test-case reduction techniques
+        that we use. In the public API you will almost never need to think about this, but if you have
+        observed a problem you can read <a
+            href="https://github.com/HypothesisWorks/hypothesis/blob/11c7c08d1a1b5208890f4bb7e1bf9359fcff80d1/guides/strategies-that-shrink.rst">
+            our official guide to writing strategies that shrink well</a>, and consider
+        <a href="https://github.com/HypothesisWorks/hypothesis/issues">reporting it as a bug</a>.
+    </p>
+    <p>
+        If you're wondering about performance, you can
+        <a href="https://hypothesis.readthedocs.io/en/latest/details.html#test-statistics">
+            check your test statistics</a> to see typical runtimes and what fraction of that was spent
+        generating data - it's usually not much.
     </p>
     <img src="img/outline-3.jpg" class="slide"
         alt="The outline slide, with 'indistinguishable from magic' (section 3) highlighted">
     <p>
-        Now we get to my favourite section of the talk the cutting edge techniques that to my knowledge
-        are not available in Python nor widely used at all.
+        Now we get to my favourite section of the talk: the cutting edge techniques that - as of this talk
+        in August 2019 - to my knowledge are not available in Python, nor widely used at all.
     </p>
     <p>
         Sadly, at least if you're an enormous nerd about testing, there's this vicious cycle where we start
@@ -680,8 +704,12 @@
         powerful it also relies on the use of choosing a useful target function and often there isn't a target
         function which corresponds really well with bugginess - so while we might be able to drive to particular
         extremes of our input space, whether that actually helps us find bugs is kind of unclear.
-        That said, Hypothesis <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-38-0">
-            now supports targeted PBT</a>, so you can try it out and let us know whether it helps.
+    </p>
+    <p>
+        We added targeted property-based testing in
+        <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-38-0">
+            Hypothesis 4.38, in October 2019</a>,
+        a few months after I gave this talk, so you can try it out and let us know whether it helps.
     </p>
     <img src="img/symbolic.jpg" class="slide"
         alt="Zoomed-out view of a very complicated flow-chart, labelled 'symbolic execution'">
@@ -1165,10 +1193,12 @@ def test_record_json_roundtrip(value):
         intensive testing is not always suitable for every codebase but for when it is I hope you consider
         some of the tools I've spoken about today.
     </p>
-    <p>
+    <hr>
+    <p style="text-align:center">
         <i>This transcript is under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">
                 CC-BY-NC-ND</a> or <a href="mailto:zac@zhd.dev">ask-me-for-a</a> license.</i>
     </p>
+    <p style="text-align:center"><a href=".."><i>Back to homepage.</i></a></p>
 </body>
 
 </html>
