@@ -1077,7 +1077,9 @@ def test_record_json_roundtrip(value):
             <code>st.builds()</code></a>
         strategy, which takes some class or function and then strategies corresponding to the arguments for it.
         If you have type annotated required arguments with no user supplied strategies, <code>st.builds()</code>
-        will recursively infer how to build it. That was a hard feature to implement across Python versions!
+        will recursively infer how to build it using
+        <a href="https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.from_type">
+            <code>st.from_type()</code></a>. That was a hard feature to implement across Python versions!
     </p>
     <p>
         <strong>
@@ -1101,7 +1103,7 @@ def test_record_json_roundtrip(value):
         </strong>
     </p>
     <p>
-        Potentially, so this is one of the reasons I would think of targeting as a potentially fragile technique.
+        Potentially - this is one of the reasons I would think of targeting as a potentially fragile technique.
         If it turns out that your thing is particularly vulnerable to very small inputs but you've targeted very
         large inputs, it's gonna spend most of its time generating inputs which won't find those small bugs.
         So part of the design would be making sure it balances a little between generating things that's been
@@ -1137,6 +1139,8 @@ def test_record_json_roundtrip(value):
         write Python tests which themselves test operating system function but for compiled code I
         turn first to something like <a href="http://lcamtuf.coredump.cx/afl/">American Fuzzy Lop</a>,
         which is a dedicated machine code fuzzing tool.
+    </p>
+    <p>
         Hypothesis does not by default test across multiple operating systems but if you had a function
         which ran some piece of code on multiple operating systems you could then use Hypothesis to
         assert that they all return the same result.
@@ -1162,15 +1166,17 @@ def test_record_json_roundtrip(value):
         </strong>
     </p>
     <p>
-        That one is hard right this is part of the problem of how do we even know what the correct answer is
-        sometimes there are properties you can check so after each training epoch for example you could
-        check that the model weights have changed for every layer or you could make assertions about the
-        balance that probabilities regardless of what they end up being must always be between zero and
-        one or that adding certain desirable features does not decrease the score when you classify things
-        like that so well you can't test the exact expected output you can still tell something about often if
-        you perturb the input what kind of change do you expect in the output especially with machine
-        learning that won't always indicate you have a bug it might just be that you've misunderstood your
-        system it's hard.
+        These are tricky to test because the input data tends to be large, and we don't always have a
+        clear idea of what they <i>should</i> be doing. You can still test that
+        <a href="https://medium.com/@keeper6928/how-to-unit-test-machine-learning-code-57cf6fd81765">
+            internals of your model are all connected correctly</a>, and for some outputs like a list
+        of probabilities <code>ps</code> we can check bounds like <code>0 <= min(ps) <= max(ps) <= 1</code>
+        and <code>sum(ps) == 1</code>.
+    </p>
+    <p>
+        I also mentioned <a href="https://www.hillelwayne.com/post/metamorphic-testing/">metamorphic testing</a>
+        before, and it's a great source of properties for data science and ML code. Just go read that
+        post - there are case studies in unsupervised learning, bmcbioinformatics, and vision systems!
     </p>
     <p>
         <strong>
@@ -1180,18 +1186,26 @@ def test_record_json_roundtrip(value):
         </strong>
     </p>
     <p>
-        Sometimes you just don't care about certain bugs my instinct would always be try to catch that stuff
-        when you're validating your inputs so whatever the bug is right either it is a bug that we care about
-        for whatever reason in which case it will be good to return an explicit error or my view is it's not
-        something we should consider a bug at all. Maybe that behaviour is less than ideal but my view of a
-        bug really is that it's something we would want to change about our code in order to consider it
-        fixed. There are some people who dislike Hypothesis because it finds all kinds of ways to trigger
-        exceptions that they just don't want to hear about because there are hundreds of them and they
-        already have a thousand open tickets. I'm sympathetic. I've been there too. Ultimately no testing,
-        no analysis, no correctness technique is actually useful if you don't want to act on the results. So in
-        much the same way as I would not say the type checking is suitable for every codebase, really
-        intensive testing is not always suitable for every codebase but for when it is I hope you consider
-        some of the tools I've spoken about today.
+        Traditional fuzzers don't have any concept of "valid" inputs, just "inputs that don't do anything
+        interesting" because e.g. parsing or validation logic rejected them early. I've found that the
+        <a href="https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/">parse, don't validate</a>
+        approach helps with this - both by making my code more robust, and by forcing me to think clearly
+        about what inputs I expect to handle.
+    </p>
+    <img src="img/then-dont-do-that.jpg" class="profile" alt="The doctor says 'then don't do that [painful pose]'">
+    <p>
+        Sometimes though there are representable inputs that are just out of scope for the project.
+        Maybe that's less than ideal, but if we don't want to change the code to fix some issue or
+        exception I don't think of it as a bug. I know that there are people who dislike Hypothesis,
+        because it finds hundreds of ways to trigger exceptions which they don't want to hear about
+        when they already have a thousand open tickets. I'm sympathetic. I've been there too.
+    </p>
+    <p>
+        Ultimately no testing, no analysis, no correctness technique is actually useful if you don't want
+        to act on the results. So in much the same way as I would not say that
+        <a href="https://mypy.readthedocs.io/en/latest/faq.html">static typing</a> is suitable for
+        every codebase, really intensive testing is not a good fit for every project - but when it you can
+        use the tools I've spoken about today to get better results with less work.
     </p>
     <hr>
     <p style="text-align:center">
