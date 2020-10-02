@@ -12,8 +12,7 @@
     <p style="text-align:center">
         <i>
             Notes for my talk <a href="https://2020.pycon.org.au/program/tct3gh/">
-                Stop Writing Tests!</a> (<a href="https://www.youtube.com/watch?v=tiy031EoDXo">video</a>) at
-            <a href="https://2020.pycon.org.au/">PyConAU</a>.
+                Stop Writing Tests!</a> at <a href="https://2020.pycon.org.au/">PyConAU</a>.
             More about me <a href="/">on my homepage</a>.
         </i>
     </p>
@@ -38,10 +37,30 @@
             <a href="https://hypofuzz.com/docs/literature.html">related research</a>,
             and <a href="https://hypofuzz.com/example-dashboard/">an example dashboard</a>.
         </li>
+    </ul>
+    <p>Related talks:</p>
+    <ul>
         <li>
             <a href="/sufficiently"><i>Sufficiently Advanced Testing</i></a>, the deep-dive
             precursor talk I gave last year.
+        </li>
+        <li>
+            <a href="https://www.youtube.com/watch?v=tiy031EoDXo">watch the talk on YouTube</a>
+        </li>
     </ul>
+    <p>The most common complaint I hear about property-based testing is "I don't know what properties
+        to test!". Fair enough! For simple properties, check out
+        <a href="https://hypothesis.readthedocs.io/en/latest/ghostwriter.html">the Hypothesis ghostwriter</a>
+        and then read <a href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/">
+            this introduction for F#</a> - it's a classic, and has great diagrams.
+    </p>
+    <p>
+        In more complex cases, you'll want to reach for
+        <a href="https://www.hillelwayne.com/post/metamorphic-testing/">metamorphic properties</a>,
+        which are <i>absurdly</i> powerful (and applicable to almost everything).
+        The coolest - and probably most complex - one I've seen is <a href="http://vuminhle.com/pdf/pldi14-emi.pdf">
+            program equivalence modulo inputs (pdf)</a>, for testing compiler optimisations!
+    </p>
 
     <hr>
 
