@@ -440,6 +440,19 @@
         It can scale down to just calling your function, and all the way up to complex scientific
         code and cutting-edge machine learning!
     </p>
+    <p>
+        <i>
+            We added a <code>fuzz_one_input</code> method in
+            <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-38-0">
+                Hypothesis 5.8, in March 2020</a>, so you can use Hypothesis with
+            <a href="https://pypi.org/project/python-afl/">python-afl</a> or
+            <a href="https://pypi.org/project/pythonfuzz/">pythonfuzz</a>...
+            but I'd recommend going straight to the cutting edge <strong>
+                <a href="https://hypofuzz.com">HypoFuzz</a></strong>
+            project, which is purpose-built for Hypothesis tests. The interface is a lot nicer,
+            and it's designed to fit Python development workflows.
+        </i>
+    </p>
     <img src="img/wires.jpg" class="slide" alt="Stripped copper wires, labelled 'faster than a speeding packet!'">
     <p>
         At this point I owe you a really quick overview of Hypothesis itself.
@@ -664,8 +677,10 @@
         or how cute ladybugs are.
     </p>
     <p>
-        We added swarm testing in <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-49-0">
-            Hypothesis 4.49, in November 2019</a>, a few months after I gave this talk.
+        <i>
+            We added swarm testing in <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-49-0">
+                Hypothesis 4.49, in November 2019</a>, a few months after I gave this talk.
+        </i>
     </p>
     <img src="img/targeting.jpg" class="slide" alt="Dartboard with a bullseye, labelled 'Targeted PBT'">
     <p>
@@ -706,10 +721,12 @@
         extremes of our input space, whether that actually helps us find bugs is kind of unclear.
     </p>
     <p>
-        We added targeted property-based testing in
-        <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-38-0">
-            Hypothesis 4.38, in October 2019</a>,
-        a few months after I gave this talk, so you can try it out and let us know whether it helps.
+        <i>
+            We added targeted property-based testing in
+            <a href="https://hypothesis.readthedocs.io/en/latest/changes.html#v4-38-0">
+                Hypothesis 4.38, in October 2019</a>,
+            a few months after I gave this talk, so you can try it out and let us know whether it helps.
+        </i>
     </p>
     <img src="img/symbolic.jpg" class="slide"
         alt="Zoomed-out view of a very complicated flow-chart, labelled 'symbolic execution'">
@@ -1206,6 +1223,16 @@ def test_record_json_roundtrip(value):
         <a href="https://mypy.readthedocs.io/en/latest/faq.html">static typing</a> is suitable for
         every codebase, really intensive testing is not a good fit for every project - but when it you can
         use the tools I've spoken about today to get better results with less work.
+    </p>
+    <hr>
+    <p>
+        <i>
+            If you made it this far, you're probably keen on advanced testing ideas - and would enjoy
+            reading <a href="https://hypofuzz.com/docs/literature.html">
+                my review of ideas from fuzzing and testing research</a> which inspired me to
+            build the <a href="https://hypofuzz.com">HypoFuzz</a> adaptive fuzzer for test-suites.
+            Check it out, and <a href="mailto:zac@hypofuzz.com">tell me what you think</a>!
+        </i>
     </p>
     <hr>
     <p style="text-align:center">
