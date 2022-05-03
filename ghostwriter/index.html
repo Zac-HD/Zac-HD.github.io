@@ -1,0 +1,155 @@
+<html>
+  <head>
+    <title>Ghostwriter Demo</title>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" type="image/svg" href="/img/zahlen.svg" />
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+
+    <!-- Syntax highlighting magic for code blocks; CSS in /style.css -->
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="stylesheet" type="text/css" href="./ghostwriter-style.css" />
+    <script src="/prism.js"></script>
+
+    <!-- Demo-specific js helpers to read and write to the HTML -->
+    <script src="./hydemo.js"></script>
+  </head>
+
+  <body>
+    <h1>Ghostwriter Demo</h1>
+    <p>
+      <i
+        >Tired of writing tests?
+        <a href="https://hypothesis.readthedocs.io/">Hypothesis</a> has you
+        covered!
+      </i>
+    </p>
+
+    <div>
+      <label for="function_names">
+        <abbr
+          title="Write the name(s) of one of more functions or modules, in the standard library or on PyPI"
+          ><b>What to test:</b></abbr
+        >
+      </label>
+      <input
+        type="text"
+        id="function_names"
+        name="function_names"
+        value="gzip.compress"
+        style="width: 20em"
+        onkeydown="if(event.key === 'Enter') { write_tests(); }"
+      />
+      <input
+        type="button"
+        value="Ghostwrite tests"
+        onclick="write_tests()"
+        disabled
+      />
+      <div id="ghostwriter-spinner" class="loader"></div>
+      <br />
+      <b>Property:</b>
+      <input
+        type="radio"
+        id="magic-button"
+        name="writer"
+        value="magic"
+        checked="checked"
+      />
+      <label for="magic"
+        ><abbr title="Magically guess what test we should write"
+          >magic</abbr
+        ></label
+      >
+      <input
+        type="radio"
+        id="roundtrip-button"
+        name="writer"
+        value="roundtrip"
+      />
+      <label for="roundtrip"
+        ><abbr title="e.g.  x == decode(encode(x)); or x == load(save(x))"
+          >roundtrip</abbr
+        ></label
+      >
+      <input
+        type="radio"
+        id="equivalent-button"
+        name="writer"
+        value="equivalent"
+      />
+      <label for="equivalent"
+        ><abbr
+          title="e.g.  f(x) == g(x); great for ports, perf optimizations, and refactoring"
+          >equivalent</abbr
+        ></label
+      >
+      <br />
+      <b>Style</b>
+      <input
+        type="radio"
+        id="pytest-button"
+        name="style"
+        value="pytest"
+        checked="checked"
+      />
+      <label for="pytest"
+        ><abbr title="write test functions">pytest</abbr></label
+      >
+      <input type="radio" id="unittest-button" name="style" value="unittest" />
+      <label for="unittest"
+        ><abbr title="write test classes">unittest</abbr></label
+      >
+    </div>
+
+    <h2>Test code</h2>
+    <div style="border-style: dotted">
+      <pre><code class="language-python" id="ghostwriter-output" contenteditable="true" onblur="Prism.highlightAll()">def test():
+    assert False</code></pre>
+    </div>
+
+    <div>
+      Once you're done editing the test code,
+      <button onclick="run_tests()" disabled>Run tests</button>
+      <div id="pytest-spinner" class="loader" style="visibility: hidden"></div>
+    </div>
+    <pre
+      style="white-space: pre-wrap; word-break: keep-all"
+    ><code class="language-python" id="pytest-output">test... failed
+Traceback (most recent call last):
+  File "", line 2, in test
+AssertionError</code></pre>
+
+    <h2>Wait, what?</h2>
+    <p>
+      It's an interactive demo for
+      <a href="https://hypothesis.readthedocs.io/en/latest/ghostwriter.html"
+        >the Hypothesis Ghostwriter</a
+      >, a Python tool which helps you to get started with
+      <a
+        href="https://increment.com/testing/in-praise-of-property-based-testing/"
+        >property-based testing</a
+      >. Thanks to <a href="https://pyodide.org/">Pyodide</a>, we can run Python
+      client-side to both generate and execute tests - and even
+      <code>pip install</code> missing packages! If you're not sure how to get
+      started, try the <code>gzip.compress</code> example and replacing
+      <code>data=st.nothing()</code> with <code>data=st.binary()</code> to
+      generate bytestrings.
+    </p>
+    <p>
+      Want to install Hypothesis locally?
+      <code>pip install "hypothesis[cli]"</code> and you'll get the Python
+      library and a <code>hypothesis write</code> command which can do all this
+      and more. If you're already using Hypothesis, check out
+      <a href="https://hypofuzz.com/">HypoFuzz</a>: it's a world-class fuzzing
+      workflow for your test suite.
+    </p>
+    <hr />
+    <p style="text-align: center">
+      <i
+        ><a href="/">back to homepage</a> /
+        <a href="https://github.com/Zac-HD">forward to github</a></i
+      >
+    </p>
+  </body>
+</html>
