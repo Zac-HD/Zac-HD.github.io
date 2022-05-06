@@ -5,6 +5,8 @@ from io import StringIO
 from traceback import format_exception
 from typing import Literal
 
+import black
+
 from hypothesis.extra import ghostwriter
 from hypothesis.reporting import with_reporter
 
@@ -58,6 +60,16 @@ async def write_a_test(
     except BaseException as err:
         print(format_exception(err))
         return f"# {type(err).__name__}: {err}"
+
+
+def format_code(source_code):
+    msg = "# TODO: replace st.nothing() with an appropriate strategy\n\n"
+    if msg in source_code and source_code.count("st.nothing()") == 1:
+        source_code = source_code.replace(msg, "")
+    try:
+        return black.format_str(source_code, mode=black.FileMode())
+    except Exception:
+        return source_code
 
 
 def run_tests(source_code):

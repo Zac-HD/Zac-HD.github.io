@@ -36,6 +36,13 @@ async function write_tests() {
   run_tests();
 }
 
+function format_code() {
+  code_div = document.getElementById("ghostwriter-output");
+  source_code = code_div.innerHTML.replace(/<\/?span[^>]*>/g, "");
+  code_div.innerHTML = hydemoMod.format_code(source_code);
+  Prism.highlightAll();
+}
+
 function run_tests() {
   spinner = document.getElementById("pytest-spinner");
   spinner.style.visibility = "visible";
