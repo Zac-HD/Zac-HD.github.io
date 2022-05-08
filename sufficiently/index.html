@@ -885,10 +885,10 @@
     self.assertEqual(branch_name, repo.get_active_branch())
 </code></pre>
     <p>
-        Well step one is to move arbitrary constants to keyword arguments. This test behaves
+        Well, step one is to move arbitrary constants to keyword arguments. This test behaves
         identically to the old one; it doesn't depend on Hypothesis so you can do this before step one
-        though step one is great. What we've got now is a variable which indicates the branch name and so
-        our test semantically is saying given any branch name this should pass.
+        (though step one is great). What we've got now is a variable which indicates the branch name, and so
+        our test semantically is saying that this should pass for any branch name.
     </p>
     <pre><code class="language-python">@given(branch_name=st.just("new-branch"))
 def test_checkout_new_branch(branch_name):
@@ -903,9 +903,9 @@ def test_checkout_new_branch(branch_name):
     <p>
         Then abstraction is great, don't repeat yourself, so we'll extract that out to a separate
         function which returns a strategy for valid branch names. This means that we could reuse the
-        strategy across any test that's using the names of branches and when we eventually go back and
-        improve that strategy all of our tests will get more powerful so if our requirements change we have
-        a single place where we can change to improve our tests.
+        strategy across any test that's using the names of branches. When we eventually go back and
+        improve that strategy, all of our tests will get more powerful - if our requirements change we have
+        a single place where we can change to improve all our tests.
     </p>
     <pre><code class="language-python">def valid_branch_names():
     # TODO: Improve this strategy.
@@ -949,11 +949,11 @@ def test_checkout_new_branch(branch_name):
     ...
 </code></pre>
     <p>
-        What do we do then it's at least possible that this will generate the string <code>"master"</code> being six
-        characters and so we add at the top of our test function an assumption an assumption. "assume" is
+        What do we do then? It's possible that this will generate the string <code>"master"</code> being six
+        characters, and so we add an assumption to the top of our test function. <code>assume()</code> is
         a function from Hypothesis which is much like an assertion, but instead of indicating that the test
-        has failed it indicates that the input is problematic in some way and just tells Hypothesis look that
-        one was okay but don't give it to me again and don't count that as a failure try again.
+        has failed it indicates that the input is problematic in some way and just tells Hypothesis 'look that
+        one was okay but don't give it to me again, and don't count that as a failure, try again'.
         So we can make our assumption right we can say any sequence of letters, but not the sequence
         <code>"master"</code>, and this test should pass.
     </p>
@@ -971,13 +971,13 @@ def test_checkout_new_branch(repo, branch_name):
         <code>"targeted-pbt"</code> or <code>"working-on-that-bugfix"</code>.
     </p>
     <p>
-        The end result once we finalize refactoring this we might have a strategy for repositories as well.
-        Instead of creating a new empty repository, we can say that this property should be true of all of
-        them and so it's not just the master branch that we want to exclude but we can say given any
-        repository and any valid branch name if the branch name is not yet in the branches in the repository
+        By the time we finish refactoring this, we might have a strategy for repositories as well.
+        Instead of creating a new empty repository, we can say that this property should be true of all repos,
+        and so it's not just the master branch that we want to exclude. We can say that given any
+        repository and any valid branch name, if the branch name is not yet in the branches in the repository
         then checking out that branch means that the currently active branch will be whichever one we just
         checked out. This is about as close to a genuinely mathematical property as you will see in code which
-        is not doing simple data transformation. You can test that stuff too right it's great it's easy but you
+        is not doing simple data transformation. You can test that stuff too right, it's great, it's easy, but you
         can also test for more complicated stuff.
     </p>
     <p>
@@ -1089,7 +1089,7 @@ def test_record_json_roundtrip(value):
         </strong>
     </p>
     <p>
-        Yes it can. If you decorate a test with <code>@given(value=hypothesis.infer)</code> and you type-annotated
+        Yes it can. If you decorate a test with <code>@given(value=...)</code> and you type-annotated
         the <code>value</code> argument that works. We also have the
         <a href="https://hypothesis.readthedocs.io/en/latest/data.html#hypothesis.strategies.builds">
             <code>st.builds()</code></a>
@@ -1194,7 +1194,7 @@ def test_record_json_roundtrip(value):
     <p>
         I also mentioned <a href="https://www.hillelwayne.com/post/metamorphic-testing/">metamorphic testing</a>
         before, and it's a great source of properties for data science and ML code. Just go read that
-        post - there are case studies in unsupervised learning, bmcbioinformatics, and vision systems!
+        post - there are case studies in unsupervised learning, bioinformatics, and vision systems!
     </p>
     <p>
         <strong>
@@ -1220,9 +1220,9 @@ def test_record_json_roundtrip(value):
     </p>
     <p>
         Ultimately no testing, no analysis, no correctness technique is actually useful if you don't want
-        to act on the results. So in much the same way as I would not say that
+        to act on the results. So much like I would not say that
         <a href="https://mypy.readthedocs.io/en/latest/faq.html">static typing</a> is suitable for
-        every codebase, really intensive testing is not a good fit for every project - but when it you can
+        every codebase, really intensive testing is not a good fit for every project - but when it is you can
         use the tools I've spoken about today to get better results with less work.
     </p>
     <hr>
