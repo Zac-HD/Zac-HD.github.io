@@ -36,24 +36,20 @@ async function write_tests() {
   run_tests();
 }
 
-function format_code() {
-  code_div = document.getElementById("ghostwriter-output");
-  source_code = code_div.innerHTML.replace(/<\/?span[^>]*>/g, "");
-  code_div.innerHTML = hydemoMod.format_code(source_code);
-  Prism.highlightAll();
-}
-
 function run_tests() {
   spinner = document.getElementById("pytest-spinner");
   spinner.style.visibility = "visible";
   code_div = document.getElementById("ghostwriter-output");
+  code_div = document.getElementById("ghostwriter-output");
+  source_code = hydemoMod.format_code(code_div.innerHTML);
+  code_div.innerHTML = source_code;
+  //Prism.highlightAll();
   test_div = document.getElementById("pytest-output");
-  source_code = code_div.innerHTML.replace(/<\/?span[^>]*>/g, "");
   try {
     test_div.innerHTML = hydemoMod.run_tests(source_code);
   } catch (err) {
     test_div.innerHTML = err;
   }
-  Prism.highlightAll();
+  //Prism.highlightAll();
   spinner.style.visibility = "hidden";
 }
