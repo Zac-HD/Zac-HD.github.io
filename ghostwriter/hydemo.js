@@ -57,12 +57,13 @@ async function write_tests() {
 async function run_tests() {
   spinner = document.getElementById("pytest-spinner");
   spinner.style.visibility = "visible";
+  test_div = document.getElementById("pytest-output");
+  test_div.textContent = "results pending..."
   await allow_time_for_paint()
   code_div = document.getElementById("ghostwriter-output");
   code_div = document.getElementById("ghostwriter-output");
   source_code = hydemoMod.format_code(code_div.textContent);
   code_div.textContent = source_code;
-  test_div = document.getElementById("pytest-output");
   try {
     test_div.textContent = hydemoMod.run_tests(source_code);
   } catch (err) {
