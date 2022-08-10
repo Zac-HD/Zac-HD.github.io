@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <link rel="shortcut icon" type="image/svg" href="/img/zahlen.svg" />
 
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.20.0/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.21.0/full/pyodide.js"></script>
 
     <!-- Syntax highlighting magic for code blocks; CSS in /style.css -->
     <link rel="stylesheet" type="text/css" href="/style.css" />
     <link rel="stylesheet" type="text/css" href="./ghostwriter-style.css" />
+    <script src="/prism.js"></script>
 
     <!-- Demo-specific js helpers to read and write to the HTML -->
     <script src="./hydemo.js"></script>
@@ -102,7 +103,7 @@
     </div>
 
     <h2>Test code</h2>
-    <div style="border-style: dotted; padding: 0 0.5em;">
+    <div style="border-style: dotted; padding: 0 0;">
       <pre><code id="ghostwriter-output" contenteditable="true" class="language-python">def test():
     assert False</code></pre>
     </div>

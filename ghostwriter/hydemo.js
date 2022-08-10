@@ -6,8 +6,7 @@ async function _setup() {
   await micropip_promise;
   await pyodide.runPythonAsync(`
     import micropip
-    await micropip.install('hypothesis')
-    await micropip.install('./black-22.3.1.dev27+gfb8dfde.d20220502-py3-none-any.whl')
+    await micropip.install('hypothesis[cli]')
 `);
   pyodide.unpackArchive(hydemoBuffer, "zip");
   const hydemoMod = pyodide.pyimport("hydemo");
@@ -31,7 +30,7 @@ async function write_tests() {
   func_name = document.getElementById("function_names").value;
   writer = document.querySelector("input[name=writer]:checked").value;
   style = document.querySelector("input[name=style]:checked").value;
-  code_div.innerHTML = await hydemoMod.write_a_test(func_name, writer, style);
+  code_div.textContent = await hydemoMod.write_a_test(func_name, writer, style);
   spinner.style.visibility = "hidden";
   run_tests();
 }
@@ -41,15 +40,14 @@ function run_tests() {
   spinner.style.visibility = "visible";
   code_div = document.getElementById("ghostwriter-output");
   code_div = document.getElementById("ghostwriter-output");
-  source_code = hydemoMod.format_code(code_div.innerHTML);
-  code_div.innerHTML = source_code;
-  //Prism.highlightAll();
+  source_code = hydemoMod.format_code(code_div.textContent);
+  code_div.textContent = source_code;
   test_div = document.getElementById("pytest-output");
   try {
-    test_div.innerHTML = hydemoMod.run_tests(source_code);
+    test_div.textContent = hydemoMod.run_tests(source_code);
   } catch (err) {
-    test_div.innerHTML = err;
+    test_div.textContent = err;
   }
-  //Prism.highlightAll();
   spinner.style.visibility = "hidden";
+  Prism.highlightElement(test_div);
 }
