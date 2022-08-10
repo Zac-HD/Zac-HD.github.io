@@ -72,9 +72,16 @@ def format_code(source_code):
         return source_code
 
 
+PRELUDE = """\
+from hypothesis import Phase, settings;\
+settings.register_profile("browser", deadline=None, phases=list(Phase));\
+settings.load_profile("browser")
+"""
+
+
 def run_tests(source_code):
     ns = {}
-    exec(source_code, ns, ns)
+    exec(compile(PRELUDE + source_code, "test_code.py", "exec"), ns, ns)
 
     if "\nimport unittest\n" in source_code and "unittest" in ns:
         unittest = ns["unittest"]
