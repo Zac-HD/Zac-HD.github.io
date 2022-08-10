@@ -39,6 +39,7 @@
         value="gzip.compress"
         style="width: 20em"
         onkeydown="if(event.key === 'Enter') { write_tests(); }"
+        disabled
       />
       <input
         type="button"
@@ -55,6 +56,7 @@
         name="writer"
         value="magic"
         checked="checked"
+        disabled
       />
       <label for="magic"
         ><abbr title="Magically guess what test we should write"
@@ -66,6 +68,7 @@
         id="roundtrip-button"
         name="writer"
         value="roundtrip"
+        disabled
       />
       <label for="roundtrip"
         ><abbr title="e.g.  x == decode(encode(x)); or x == load(save(x))"
@@ -77,6 +80,7 @@
         id="equivalent-button"
         name="writer"
         value="equivalent"
+        disabled
       />
       <label for="equivalent"
         ><abbr
@@ -92,11 +96,12 @@
         name="style"
         value="pytest"
         checked="checked"
+        disabled
       />
       <label for="pytest"
         ><abbr title="write test functions">pytest</abbr></label
       >
-      <input type="radio" id="unittest-button" name="style" value="unittest" />
+      <input type="radio" id="unittest-button" name="style" value="unittest" disabled />
       <label for="unittest"
         ><abbr title="write test classes">unittest</abbr></label
       >
@@ -110,8 +115,8 @@
 
     <div>
       Once you're done editing the test code,
-      <button onclick="run_tests()" disabled>Run tests</button>
-      <div id="pytest-spinner" class="loader" style="visibility: hidden"></div>
+      <button onclick="run_tests()">Run tests</button>
+      <div id="pytest-spinner" class="loader" ></div>
     </div>
     <pre
       style="white-space: pre-wrap; word-break: keep-all"
