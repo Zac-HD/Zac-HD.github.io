@@ -1,17 +1,35 @@
 async function _setup() {
-  document.addEventListener('DOMContentLoaded', (event) => {
-    let params = new URLSearchParams(window.location.search);
-    if (params.has("q")) {document.getElementById("function_names").setAttribute('value', params.get("q"))};
-    if (params.has("writer") && params.get("writer") != "magic") {
-      let writer = params.get("writer");
-      document.querySelector(`input[value="${writer}"]`).checked = true;
-    }
-    if (params.has("style") && params.get("style") != "pytest") {
-      let style = params.get("style");
-      document.querySelector(`input[value="${style}"]`).checked = true;
-    }
-  })
+  let params = new URLSearchParams(window.location.search);
+  if (params.has("q")) {document.getElementById("function_names").setAttribute('value', params.get("q"))};
+  if (params.has("writer") && params.get("writer") != "magic") {
+    let writer = params.get("writer");
+    document.querySelector(`input[value="${writer}"]`).checked = true;
+  }
+  if (params.has("style") && params.get("style") != "pytest") {
+    let style = params.get("style");
+    document.querySelector(`input[value="${style}"]`).checked = true;
+  }
+
+  document.querySelectorAll("[disabled]").forEach(function (btn) {
+    btn.removeAttribute("disabled");
+  });
+  document.getElementById("ghostwriter-spinner").style.visibility = "hidden";
+  document.getElementById("pytest-spinner").style.visibility = "hidden";
+  if (params.has("q")) {write_tests();};
+
+  _setup_pyodide();  // start this now in the background
+}
+window.addEventListener('DOMContentLoaded', _setup);
+
+_pyodideLoadedPromise = new Promise(resolve => {
+  window.__pyodideLoadedCallback = resolve;
+});
+
+const allow_time_for_paint = () => new Promise(resolve => setTimeout(resolve, 50));
+
+async function _setup_pyodide() {
   let pyodide = await loadPyodide();
+  // pyodide.setDebug(true)
   await pyodide.loadPackage("micropip");
   await Promise.all([
     pyodide.runPythonAsync(`
@@ -26,18 +44,8 @@ async function _setup() {
     `)
   ]);
   window.hydemoMod = pyodide.pyimport("hydemo");
-
-  document.querySelectorAll("[disabled]").forEach(function (btn) {
-    btn.removeAttribute("disabled");
-  });
-  document.getElementById("ghostwriter-spinner").style.visibility = "hidden";
-  document.getElementById("pytest-spinner").style.visibility = "hidden";
-  let params = new URLSearchParams(window.location.search);
-  if (params.has("q")) {write_tests();};
+  window.__pyodideLoadedCallback();
 }
-_setup()
-
-const allow_time_for_paint = () => new Promise(resolve => setTimeout(resolve, 50));
 
 async function write_tests() {
   spinner = document.getElementById("ghostwriter-spinner");
@@ -59,6 +67,7 @@ async function write_tests() {
 	if (cached) {
 		code_div.textContent = cached;
 	} else {
+    await _pyodideLoadedPromise;
     code_div.textContent = await hydemoMod.write_a_test(func_name, writer, style);
     localStorage.setItem(key, code_div.textContent);
   }
@@ -74,10 +83,11 @@ async function run_tests() {
   test_div.textContent = "results pending..."
   await allow_time_for_paint()
   code_div = document.getElementById("ghostwriter-output");
+  await _pyodideLoadedPromise;
   source_code = hydemoMod.format_code(code_div.textContent);
   code_div.textContent = source_code;
   try {
-    test_div.textContent = hydemoMod.run_tests(source_code);
+    test_div.textContent = await hydemoMod.run_tests(source_code);
   } catch (err) {
     test_div.textContent = err;
   }

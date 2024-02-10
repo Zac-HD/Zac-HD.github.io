@@ -1,3 +1,4 @@
+import ast
 import builtins
 import importlib
 from difflib import get_close_matches
@@ -79,9 +80,21 @@ settings.load_profile("browser")
 """
 
 
-def run_tests(source_code):
+async def run_tests(source_code, *, try_install=True):
     ns = {}
-    exec(compile(PRELUDE + source_code, "test_code.py", "exec"), ns, ns)
+    try:
+        exec(compile(PRELUDE + source_code, "test_code.py", "exec"), ns, ns)
+    except ModuleNotFoundError:
+        if try_install:
+            # If we're running tests from cache, run the install-on-import logic
+            for n in ast.walk(ast.parse(source_code)):
+                if isinstance(n, ast.Import):
+                    for alias in n.names:
+                        await get_module_by_name(alias.name)
+                elif isinstance(n, ast.ImportFrom):
+                    await get_module_by_name(n.module)
+            return await run_tests(source_code, try_install=False)
+        raise
 
     if "\nimport unittest\n" in source_code and "unittest" in ns:
         unittest = ns["unittest"]
