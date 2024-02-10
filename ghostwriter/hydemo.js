@@ -12,22 +12,21 @@ async function _setup() {
     }
   })
   let pyodide = await loadPyodide();
-  let micropip_promise = pyodide.loadPackage("micropip");
-  await micropip_promise;
-  await pyodide.runPythonAsync(`
-    import micropip
-    await micropip.install('hypothesis[cli]')
+  await pyodide.loadPackage("micropip");
+  await Promise.all([
+    pyodide.runPythonAsync(`
+      import micropip
+      await micropip.install('hypothesis[cli]')
+    `),
+    pyodide.runPythonAsync(`
+      from pyodide.http import pyfetch
+      response = await pyfetch("hydemo.py")
+      with open("hydemo.py", "wb") as f:
+          f.write(await response.bytes())
+    `)
+  ]);
+  window.hydemoMod = pyodide.pyimport("hydemo");
 
-    from pyodide.http import pyfetch
-    response = await pyfetch("hydemo.py")
-    with open("hydemo.py", "wb") as f:
-        f.write(await response.bytes())
-`);
-  const hydemoMod = pyodide.pyimport("hydemo");
-  return hydemoMod;
-}
-_setup().then((hydemoMod) => {
-  window.hydemoMod = hydemoMod;
   document.querySelectorAll("[disabled]").forEach(function (btn) {
     btn.removeAttribute("disabled");
   });
@@ -35,7 +34,8 @@ _setup().then((hydemoMod) => {
   document.getElementById("pytest-spinner").style.visibility = "hidden";
   let params = new URLSearchParams(window.location.search);
   if (params.has("q")) {write_tests();};
-});
+}
+_setup()
 
 const allow_time_for_paint = () => new Promise(resolve => setTimeout(resolve, 50));
 
@@ -54,7 +54,14 @@ async function write_tests() {
   const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + searchParams.toString();
   window.history.replaceState({path: url}, "", url)
 
-  code_div.textContent = await hydemoMod.write_a_test(func_name, writer, style);
+  key = [func_name, writer, style];
+	const cached = localStorage.getItem(key)
+	if (cached) {
+		code_div.textContent = cached;
+	} else {
+    code_div.textContent = await hydemoMod.write_a_test(func_name, writer, style);
+    localStorage.setItem(key, code_div.textContent);
+  }
   spinner.style.visibility = "hidden";
   await allow_time_for_paint()
   run_tests();
