@@ -53,7 +53,7 @@ async def write_a_test(
     style: Literal["pytest", "unittest"],
 ):
     try:
-        funcs = [await get_object_by_name(name) for name in func.split()]
+        funcs = [await get_object_by_name(name.strip(",")) for name in func.split()]
         if writer in ("roundtrip", "equivalent") and len(funcs) < 2:
             raise RuntimeError(f"{writer} requires multiple functions, got {funcs}")
         return getattr(ghostwriter, writer)(*funcs, style=style)
