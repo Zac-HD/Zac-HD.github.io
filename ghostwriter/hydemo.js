@@ -16,8 +16,6 @@ async function _setup() {
   document.getElementById("ghostwriter-spinner").style.visibility = "hidden";
   document.getElementById("pytest-spinner").style.visibility = "hidden";
   if (params.has("q")) {write_tests();};
-
-  _setup_pyodide();  // start this now in the background
 }
 window.addEventListener('DOMContentLoaded', _setup);
 
@@ -31,21 +29,19 @@ async function _setup_pyodide() {
   let pyodide = await loadPyodide();
   // pyodide.setDebug(true)
   await pyodide.loadPackage("micropip");
+  const micropip = pyodide.pyimport("micropip");
   await Promise.all([
-    pyodide.runPythonAsync(`
-      import micropip
-      await micropip.install('hypothesis[cli]')
-    `),
-    pyodide.runPythonAsync(`
-      from pyodide.http import pyfetch
-      response = await pyfetch("hydemo.py")
-      with open("hydemo.py", "wb") as f:
-          f.write(await response.bytes())
-    `)
+    micropip.install('pytest'),
+    micropip.install('hypothesis[cli]'),
+    fetch("hydemo.py").then(res => res.text()).then((data) => {
+      pyodide.FS.writeFile("hydemo.py", data, { encoding: "utf8" });
+    })
   ]);
   window.hydemoMod = pyodide.pyimport("hydemo");
   window.__pyodideLoadedCallback();
 }
+_setup_pyodide();  // start this immediately in the background
+
 
 async function _cached_call(fn_name, ...args) {
   const encoder = new TextEncoder();
@@ -55,8 +51,10 @@ async function _cached_call(fn_name, ...args) {
   key = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 	const cached = localStorage.getItem(key)
 	if (cached) {
+    console.log("cache hit for", raw_key.substring(0, 50));
     return cached;
   };
+  console.log("cache miss for", raw_key.substring(0, 50));
   await _pyodideLoadedPromise;
   try {
     result = await hydemoMod[fn_name](...args);
