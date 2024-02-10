@@ -1,6 +1,7 @@
 import ast
 import builtins
 import importlib
+from contextlib import redirect_stdout
 from difflib import get_close_matches
 from io import StringIO
 from traceback import format_exception
@@ -9,7 +10,6 @@ from typing import Literal
 import black
 
 from hypothesis.extra import ghostwriter
-from hypothesis.reporting import with_reporter
 
 
 async def get_module_by_name(modulename):
@@ -108,17 +108,13 @@ async def run_tests(source_code, *, try_install=True):
         unittest.TextTestRunner(stream=buf).run(suite)
         return buf.getvalue()
 
-    parts = []
-    for k, v in list(ns.items()):
-        if k.startswith("test"):
-            try:
-                with with_reporter(parts.append):
-                    v()
-                parts.append(f"{k}... passed")
-            except Exception as err:
-                tb = "".join(
-                    format_exception(err.with_traceback(err.__traceback__.tb_next))
-                ).strip()
-                parts.append(f"{k}... failed\n{tb}")
-            parts.append("\n")
-    return "\n".join(parts)
+    with open("conftest.py", "w") as f:
+        f.write(PRELUDE)
+    with open("tests.py", "w") as f:
+        f.write(source_code)
+
+    pytest = await get_module_by_name("pytest")
+    args = ["-v", "--tb=native", "-W=ignore::pytest.PytestAssertRewriteWarning"]
+    with redirect_stdout(buf := StringIO()):
+        pytest.main([*args, "tests.py"])
+    return buf.getvalue()
