@@ -11,23 +11,23 @@ async function _setup() {
       document.querySelector(`input[value="${style}"]`).checked = true;
     }
   })
-  const hydemoPromise = fetch("hydemo.zip").then((resp) => resp.arrayBuffer());
   let pyodide = await loadPyodide();
   let micropip_promise = pyodide.loadPackage("micropip");
-  const hydemoBuffer = await hydemoPromise;
   await micropip_promise;
   await pyodide.runPythonAsync(`
     import micropip
     await micropip.install('hypothesis[cli]')
+
+    from pyodide.http import pyfetch
+    response = await pyfetch("hydemo.py")
+    with open("hydemo.py", "wb") as f:
+        f.write(await response.bytes())
 `);
-  pyodide.unpackArchive(hydemoBuffer, "zip");
   const hydemoMod = pyodide.pyimport("hydemo");
-  console.log(hydemoMod);
   return hydemoMod;
 }
 _setup().then((hydemoMod) => {
   window.hydemoMod = hydemoMod;
-  console.log(hydemoMod);
   document.querySelectorAll("[disabled]").forEach(function (btn) {
     btn.removeAttribute("disabled");
   });
