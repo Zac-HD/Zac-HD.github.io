@@ -47,6 +47,26 @@ async function _setup_pyodide() {
   window.__pyodideLoadedCallback();
 }
 
+async function _cached_call(fn_name, ...args) {
+  const encoder = new TextEncoder();
+  raw_key = [fn_name, ...args].toString();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(raw_key));
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  key = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+	const cached = localStorage.getItem(key)
+	if (cached) {
+    return cached;
+  };
+  await _pyodideLoadedPromise;
+  try {
+    result = await hydemoMod[fn_name](...args);
+  } catch (err) {
+    result = err;
+  }
+  localStorage.setItem(key, result);
+  return result;
+}
+
 async function write_tests() {
   spinner = document.getElementById("ghostwriter-spinner");
   spinner.style.visibility = "visible";
@@ -61,16 +81,7 @@ async function write_tests() {
   if (style != "pytest") { searchParams.set("style", style) };
   const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + searchParams.toString();
   window.history.replaceState({path: url}, "", url)
-
-  key = [func_name, writer, style];
-	const cached = localStorage.getItem(key)
-	if (cached) {
-		code_div.textContent = cached;
-	} else {
-    await _pyodideLoadedPromise;
-    code_div.textContent = await hydemoMod.write_a_test(func_name, writer, style);
-    localStorage.setItem(key, code_div.textContent);
-  }
+  code_div.textContent = await _cached_call("write_a_test", func_name, writer, style);
   spinner.style.visibility = "hidden";
   await allow_time_for_paint()
   run_tests();
@@ -83,14 +94,9 @@ async function run_tests() {
   test_div.textContent = "results pending..."
   await allow_time_for_paint()
   code_div = document.getElementById("ghostwriter-output");
-  await _pyodideLoadedPromise;
-  source_code = hydemoMod.format_code(code_div.textContent);
+  source_code = await _cached_call("format_code", code_div.textContent);
   code_div.textContent = source_code;
-  try {
-    test_div.textContent = await hydemoMod.run_tests(source_code);
-  } catch (err) {
-    test_div.textContent = err;
-  }
+  test_div.textContent = await _cached_call("run_tests", source_code);
   spinner.style.visibility = "hidden";
   Prism.highlightElement(test_div);
 }
