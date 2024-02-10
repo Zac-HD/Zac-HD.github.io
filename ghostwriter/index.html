@@ -112,6 +112,15 @@
       <pre><code id="ghostwriter-output" contenteditable="true" class="language-python">def test():
     assert False</code></pre>
     </div>
+    <script>
+      // code by claude.ai, love it
+      document.getElementById("ghostwriter-output").addEventListener("keydown", e => {
+        if((e.ctrlKey || e.shiftKey) && e.key === "Enter") {
+          e.preventDefault();
+          run_tests();
+        }
+      });
+    </script>
 
     <div>
       Once you're done editing the test code,
