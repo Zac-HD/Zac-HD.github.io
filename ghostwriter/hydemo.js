@@ -2,8 +2,14 @@ async function _setup() {
   document.addEventListener('DOMContentLoaded', (event) => {
     let params = new URLSearchParams(window.location.search);
     if (params.has("q")) {document.getElementById("function_names").setAttribute('value', params.get("q"))};
-    //if (params.has("writer") && params.get("writer") != "magic") {};
-    //if (params.has("style") && params.get("style") != "pytest") {};
+    if (params.has("writer") && params.get("writer") != "magic") {
+      let writer = params.get("writer");
+      document.querySelector(`input[value="${writer}"]`).checked = true;
+    }
+    if (params.has("style") && params.get("style") != "pytest") {
+      let style = params.get("style");
+      document.querySelector(`input[value="${style}"]`).checked = true;
+    }
   })
   const hydemoPromise = fetch("hydemo.zip").then((resp) => resp.arrayBuffer());
   let pyodide = await loadPyodide();
@@ -43,8 +49,8 @@ async function write_tests() {
 
   let searchParams = new URLSearchParams();
   searchParams.set("q", func_name);
-  //if (writer != "magic") { searchParams.set("writer", writer) };
-  //if (style != "pytest") { searchParams.set("style", style) };
+  if (writer != "magic") { searchParams.set("writer", writer) };
+  if (style != "pytest") { searchParams.set("style", style) };
   const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + searchParams.toString();
   window.history.replaceState({path: url}, "", url)
 
@@ -60,7 +66,6 @@ async function run_tests() {
   test_div = document.getElementById("pytest-output");
   test_div.textContent = "results pending..."
   await allow_time_for_paint()
-  code_div = document.getElementById("ghostwriter-output");
   code_div = document.getElementById("ghostwriter-output");
   source_code = hydemoMod.format_code(code_div.textContent);
   code_div.textContent = source_code;
