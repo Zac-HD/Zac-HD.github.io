@@ -80,6 +80,7 @@ async function write_tests() {
   const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + searchParams.toString();
   window.history.replaceState({path: url}, "", url)
   code_div.textContent = await _cached_call("write_a_test", func_name, writer, style);
+  Prism.highlightElement(code_div);
   spinner.style.visibility = "hidden";
   await allow_time_for_paint()
   run_tests();
@@ -94,6 +95,7 @@ async function run_tests() {
   code_div = document.getElementById("ghostwriter-output");
   source_code = await _cached_call("format_code", code_div.textContent);
   code_div.textContent = source_code;
+  Prism.highlightElement(code_div);
   test_div.textContent = await _cached_call("run_tests", source_code);
   spinner.style.visibility = "hidden";
   Prism.highlightElement(test_div);

@@ -110,15 +110,21 @@
 
     <h2>Test code</h2>
     <div style="border-style: dotted; padding: 0 0;">
-      <pre><code id="ghostwriter-output" contenteditable="true" class="language-python">def test():
-    assert False</code></pre>
+      <pre><code id="ghostwriter-output" contenteditable="true" class="language-python">def test_loading_time_is_not_visible():
+    assert False
+</code></pre>
     </div>
     <script>
       // code by claude.ai, love it
-      document.getElementById("ghostwriter-output").addEventListener("keydown", e => {
+      elem = document.getElementById("ghostwriter-output");
+      elem.addEventListener("keydown", e => {
         if((e.ctrlKey || e.shiftKey) && e.key === "Enter") {
           e.preventDefault();
+          elem.classList.add('highlighted');
+          Prism.highlightElement(elem);
           run_tests();
+        } else {
+          elem.className = '';
         }
       });
     </script>
@@ -130,10 +136,13 @@
     </div>
     <pre
       style="white-space: pre-wrap; word-break: keep-all"
-    ><code class="language-python" id="pytest-output">test... failed
-Traceback (most recent call last):
-  File "", line 2, in test
-AssertionError</code></pre>
+    ><code class="language-python" id="pytest-output">============================= test session starts ==============================
+platform emscripten -- Python 3.11.3, pytest-7.2.2, pluggy-1.2.0 -- /home/pyodide/this.program
+cachedir: .pytest_cache
+hypothesis profile 'browser' -> database=None, deadline=None, derandomize=True
+rootdir: /home/pyodide
+plugins: hypothesis-6.98.3
+collecting ...</code></pre>
 
     <h2>Wait, what?</h2>
     <p>

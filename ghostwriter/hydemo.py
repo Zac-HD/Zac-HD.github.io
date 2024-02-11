@@ -74,8 +74,8 @@ def format_code(source_code):
 
 
 PRELUDE = """\
-from hypothesis import Phase, settings;\
-settings.register_profile("browser", deadline=None, phases=list(Phase));\
+from hypothesis import settings
+settings.register_profile("browser", deadline=None, derandomize=True)
 settings.load_profile("browser")
 """
 
