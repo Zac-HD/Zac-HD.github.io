@@ -16,6 +16,12 @@ async function _setup() {
   document.getElementById("ghostwriter-spinner").style.visibility = "hidden";
   document.getElementById("pytest-spinner").style.visibility = "hidden";
   if (params.has("q")) {write_tests();};
+  if (params.has("code")) {
+    code_div = document.getElementById("ghostwriter-output");
+    code_div.textContent = base64Decode(params.get("code"));
+    Prism.highlightElement(code_div);
+    run_tests();
+  };
 }
 window.addEventListener('DOMContentLoaded', _setup);
 
@@ -65,6 +71,22 @@ async function _cached_call(fn_name, ...args) {
   return result;
 }
 
+function set_query_params(func_name, writer, style, source_code) {
+  let searchParams = new URLSearchParams();
+  if (source_code === null) {
+    searchParams.set("q", func_name);
+    if (writer != "magic") { searchParams.set("writer", writer) };
+    if (style != "pytest") { searchParams.set("style", style) };
+  } else {
+    searchParams.set("code", base64Encode(source_code));
+  };
+  const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + searchParams.toString();
+  window.history.replaceState({path: url}, "", url)
+}
+
+GHOSTWRITTEN_TESTS = {};
+GHOSTWRITER_PREFIX = "# This test code was written by the `hypothesis.extra.ghostwriter` module\n# and is provided under the Creative Commons Zero public domain dedication."
+
 async function write_tests() {
   spinner = document.getElementById("ghostwriter-spinner");
   spinner.style.visibility = "visible";
@@ -73,13 +95,9 @@ async function write_tests() {
   writer = document.querySelector("input[name=writer]:checked").value;
   style = document.querySelector("input[name=style]:checked").value;
 
-  let searchParams = new URLSearchParams();
-  searchParams.set("q", func_name);
-  if (writer != "magic") { searchParams.set("writer", writer) };
-  if (style != "pytest") { searchParams.set("style", style) };
-  const url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + searchParams.toString();
-  window.history.replaceState({path: url}, "", url)
+  set_query_params(func_name, writer, style, null);
   code_div.textContent = await _cached_call("write_a_test", func_name, writer, style);
+  GHOSTWRITTEN_TESTS[func_name + ":" + writer + ":" + style] = code_div.textContent;
   Prism.highlightElement(code_div);
   spinner.style.visibility = "hidden";
   await allow_time_for_paint()
@@ -94,9 +112,39 @@ async function run_tests() {
   await allow_time_for_paint()
   code_div = document.getElementById("ghostwriter-output");
   source_code = await _cached_call("format_code", code_div.textContent);
+
+  func_name = document.getElementById("function_names").value;
+  writer = document.querySelector("input[name=writer]:checked").value;
+  style = document.querySelector("input[name=style]:checked").value;
+  prev_source = GHOSTWRITTEN_TESTS[func_name + ":" + writer + ":" + style];
+  if (source_code === prev_source) {
+    set_query_params(func_name, writer, style, null);
+  } else {
+    if (source_code.startsWith(GHOSTWRITER_PREFIX)) {
+      source_code = source_code.slice(GHOSTWRITER_PREFIX.length).trim();
+    }
+    set_query_params(func_name, writer, style, source_code);
+  };
+
   code_div.textContent = source_code;
   Prism.highlightElement(code_div);
   test_div.textContent = await _cached_call("run_tests", source_code);
   spinner.style.visibility = "hidden";
   Prism.highlightElement(test_div);
+}
+
+function base64Encode(str) {
+  const buffer = new TextEncoder().encode(str);
+  const base64Str = btoa(String.fromCharCode.apply(null, new Uint8Array(buffer)));
+  return base64Str;
+}
+
+function base64Decode(base64Str) {
+  const binaryStr = atob(base64Str);
+  const bytes = new Uint8Array(binaryStr.length);
+  for (let i = 0; i < binaryStr.length; i++) {
+    bytes[i] = binaryStr.charCodeAt(i);
+  }
+  const decodedStr = new TextDecoder().decode(bytes);
+  return decodedStr;
 }
