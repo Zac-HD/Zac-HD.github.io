@@ -79,11 +79,17 @@ settings.register_profile("browser", deadline=None, derandomize=True)
 settings.load_profile("browser")
 """
 
+# Pytest caches file contents, so increment the filename on each execution.
+COUNT = 0
+
 
 async def run_tests(source_code, *, try_install=True):
     ns = {}
+    global COUNT
+    COUNT += 1
+    fname = f"test_{COUNT}.py"
     try:
-        exec(compile(PRELUDE + source_code, "test_code.py", "exec"), ns, ns)
+        exec(compile(PRELUDE + source_code, fname, "exec"), ns, ns)
     except ModuleNotFoundError:
         if try_install:
             # If we're running tests from cache, run the install-on-import logic
@@ -110,11 +116,11 @@ async def run_tests(source_code, *, try_install=True):
 
     with open("conftest.py", "w") as f:
         f.write(PRELUDE)
-    with open("tests.py", "w") as f:
+    with open(fname, "w") as f:
         f.write(source_code)
 
     pytest = await get_module_by_name("pytest")
     args = ["-v", "--tb=native", "-W=ignore::pytest.PytestAssertRewriteWarning"]
     with redirect_stdout(buf := StringIO()):
-        pytest.main([*args, "tests.py"])
+        pytest.main([*args, fname])
     return buf.getvalue()

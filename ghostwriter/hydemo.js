@@ -42,9 +42,9 @@ async function _setup_pyodide() {
 }
 _setup_pyodide();  // start this immediately in the background
 
+const encoder = new TextEncoder();
 
 async function _cached_call(fn_name, ...args) {
-  const encoder = new TextEncoder();
   raw_key = [fn_name, ...args].toString();
   const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(raw_key));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -83,7 +83,7 @@ async function write_tests() {
   Prism.highlightElement(code_div);
   spinner.style.visibility = "hidden";
   await allow_time_for_paint()
-  run_tests();
+  await run_tests();
 }
 
 async function run_tests() {
