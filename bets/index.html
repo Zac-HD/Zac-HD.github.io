@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <title>Bets</title>
+    <link rel="shortcut icon" type="image/svg" href="/img/zahlen.svg" />
+</head>
+
+<body>
+    <h1 style="text-align:center">bets</h1>
+    <hr>
+    <p>
+        I'm generally against recreational gambling, but interested in bets as a tool for collective
+        epistemics.  I've avoided <a href="https://manifold.markets/">manifold.markets</a> for
+        confidentiality and attention-conservation reasons, but I'm fairly active on a private
+        play-money prediction market at work.  <a href="https://longbets.org/">Long Bets</a>
+        are also pretty cool.
+    </p>
+    <p>
+        This page records some public bets I've made, in the spirit that
+        <a href="https://marginalrevolution.com/marginalrevolution/2012/11/a-bet-is-a-tax-on-bullshit.html">a bet is a tax on bullshit</a>:
+    </p>
+    <h2>Against feasibility of <i>Guaranteed Safe AI</i> projects</h2>
+    <div class="bet-metadata">
+        <dl>
+            <dt>Status:</dt><dd>Active  (agreed August 2024, resolves by December 2027)</dd>
+            <dt>With:</dt>  <dd>Ben Goldhaber</dd>
+            <dt>Stakes:</dt><dd>My $10k, Ben's $1k</dd>
+        </dl>
+    </div>
+    <p>
+        I offered several open bets related to the feasibility of proposals in the
+        <a href="https://www.lesswrong.com/posts/P8XcbnYi7ooB2KR2j/provably-safe-ai-worldview-and-projects?commentId=Ku3X4QDBSyZhrtxkM">
+            Provably Safe AI: Worldview and Projects</a> post, including:
+    </p>
+    <ul>
+        <li>
+            That proposal (3), involving a semantic library for probabilistic programming and machine learning,
+            won't happen with nontrivial bounds due to difficulties in modeling nondeterministic GPUs and
+            varying floating-point formats.
+        </li>
+        <li>
+            That proposal (8), involving a provably unpickable mechanical lock, won't be attempted or will fail
+            at some combination of design, manufacture, or just being pickable.
+        </li>
+        <li>
+            On a mutually agreed operationalization against the success of other listed ideas with a physical component.
+        </li>
+    </ul>
+    <p>
+        Ben Goldhaber accepted the bet on the provably unpickable mechanical lock.  To summarize the terms:
+    </p>
+    <ul>
+        <li>I win if, by end of 2026, there's no formally-verified design, or it doesn't verify unpickability, or fewer than three physical instances are made.</li>
+        <li>Ben wins if, by end of 2027, there have been credible failed expert attempts to pick such a lock (e.g., at Defcon).</li>
+        <li>I win if there's a successful picking attempt.</li>
+        <li>The lock should have at least a thousand distinct, non-pickable keys, with the design available in advance to potential pickers.</li>
+    </ul>
+
+    <h2>Against formal verification on large language models</h2>
+    <div class="bet-metadata">
+        <dl>
+            <dt>Status:</dt><dd>Open to bets (offered November 2021)</dd>
+            <dt>Prize:</dt> <dd>Expired unclaimed, was $1,000 to any taker by 2023</dd>
+        </dl>
+    </div>
+    <p>
+        <a href="https://www.lesswrong.com/posts/CpvyhFy9WvCNsifkY/?commentId=rvSjeHizEdTRKdfGn">This comment</a>
+        lays out my belief that formal verification of large models is infeasible.  As well as offering open bets,
+        I announced a $1,000 prize for solving the following problem before 2023:
+    </p>
+    <blockquote>
+        Take an EfficientNet model with ≥99% accuracy on MNIST digit classification.
+        What is the largest possible change in the probability assigned to some class between two images,
+        which differ only in the least significant bit of a single pixel? Prove your answer.
+    </blockquote>
+    <blockquote>
+        The proof must not include executing the model or equivalent computations (e.g. concolic execution).
+        Participants may train a custom model and/or directly set model weights, as long as it uses a standard
+        EfficientNet architecture and reaches 99% accuracy. I'd award half the prize for a non-trivial bound.
+    </blockquote>
+    <p>
+        Buck and Maxwell each proposed some ideas for how a proof might work, but ultimately the prize
+        went unclaimed and nobody took me up on the offer to bet.
+    </p>
+    <p>
+        This challenge aims to demonstrate the difficulty of rigorously proving even trivial global bounds
+        on the behavior of large learned models. I believe this is and will remain infeasible for reasons
+        discussed in that comment thread, and that even if we could prove such bounds this would be unlikely
+        to help with the alignment problem or other AI risks.
+    </p>
+
+    <h2>Against massive Fortune 500 market cap decline</h2>
+    <div class="bet-metadata">
+        <dl>
+            <dt>Status:</dt><dd>Active (agreed February 2024, resolves January 2034)</dd>
+            <dt>With:</dt>  <dd>lukehmiles</dd>
+            <dt>Stakes:</dt><dd>$50 each</dd>
+        </dl>
+    </div>
+    <p>
+        <a href="https://www.lesswrong.com/posts/W8jTNtHHNQpoJyEB7/?commentId=nmyRbgaz9vu4bLcBe">
+            lukehmiles predicted</a> that "almost all [investors'] investments go to zero except for a few corps lead by absolute sharks."
+        We operationalized this as: the inflation-adjusted market cap of the bottom 50% of the Fortune 500 (as of Jan 1st 2024)
+        will decline by 80% or more by Jan 1st 2034.
+    </p>
+    <p>
+        I'm betting against this outcome. If I win, lukehmiles will donate $50 to
+        <a href="https://www.givewell.org/all-grants-fund">GiveWell's all-grants fund</a>.
+        If I lose, I'll pay $50 to lukehmiles or their charity of choice.
+    </p>
+
+    <h2>Against value of Ethicophysics to Yudkowsky</h2>
+    <div class="bet-metadata">
+        <dl>
+            <dt>Status:</dt><dd>Active (agreed November 2023, resolves December 2024)</dd>
+            <dt>With:</dt>  <dd>MadHatter</dd>
+            <dt>Stakes:</dt><dd>My $1, MadHatter's $2000</dd>
+        </dl>
+    </div>
+    <p>
+        <a href="https://www.lesswrong.com/posts/axLLEqREY5SrQ9GYW/?commentId=qv6dqjKzD5zXkpkfA">MadHatter bet</a>
+        that Eliezer Yudkowsky will find their work on ethicophysics valuable by December 1st, 2024.
+        Resolution criteria are to ask EY "which of Zac or MadHatter won this bet?", with no payment if he declines to respond.
+    </p>
+
+    <hr>
+    <p style="text-align:center"><i><a href="/">back to homepage.</a></i></p>
+</body>
+
+</html>

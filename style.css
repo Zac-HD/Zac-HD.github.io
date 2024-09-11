@@ -38,6 +38,28 @@ code {
     }
 }
 
+.bet-metadata {
+    font-size: 0.75em;
+    color: #666;
+    background-color: #f5f5f5;
+    padding: 0.625em;
+    border-radius: 0.3125em;
+    margin-bottom: 0.9375em;
+}
+
+.bet-metadata dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.3125em 0.625em;
+}
+.bet-metadata dt {
+    font-weight: bold;
+}
+
+.bet-metadata dd {
+    margin: 0;
+}
 
 /* PrismJS 1.17.1  https://prismjs.com/download.html#themes=prism&languages=python
 * prism.js default theme for JavaScript, CSS and HTML by Lea Verou, based on dabblet.com
